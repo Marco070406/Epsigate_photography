@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, type FormEvent } from "react";
+import { useState, useEffect, Suspense, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   MapPin,
@@ -17,7 +17,7 @@ import {
 
 import { API_BASE_URL } from "@/lib/api";
 
-export default function ContactPage() {
+function ContactPageInner() {
   const searchParams = useSearchParams();
   const serviceParam = searchParams.get("service") ?? "mariage";
 
@@ -471,5 +471,13 @@ export default function ContactPage() {
         </div>
       </section>
     </>
+  );
+}
+
+export default function ContactPage() {
+  return (
+    <Suspense fallback={null}>
+      <ContactPageInner />
+    </Suspense>
   );
 }
