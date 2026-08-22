@@ -12,9 +12,15 @@ const nextConfig: NextConfig = {
         pathname: "/uploads/**",
       },
       {
-        // Backend distant (prod) — remplace par ton vrai domaine
+        // Backend distant (prod) — remplace par ton vrai domaine backend
         protocol: "https",
-        hostname: "*.epsigate-photography.com",
+        hostname: "*.railway.app",
+        pathname: "/uploads/**",
+      },
+      {
+        // Ou autre hébergeur backend custom
+        protocol: "https",
+        hostname: "*.render.com",
         pathname: "/uploads/**",
       },
     ],
