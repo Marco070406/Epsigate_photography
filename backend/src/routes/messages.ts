@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
-import { getMessages, updateMessageStatus, deleteMessage, MessageStatus } from "../data/db";
+import { getMessages, updateMessageStatus, deleteMessage, getMessageById, MessageStatus } from "../data/db";
 import { requireAuth } from "../middleware/requireAuth";
+import { sendReply } from "../lib/mailer";
 
 const router = Router();
 
@@ -31,6 +32,34 @@ router.delete("/:id", requireAuth, async (req: Request, res: Response): Promise<
     return res.json({ success: true, message: "Message supprimé." });
   } catch {
     return res.status(500).json({ error: "Erreur lors de la suppression." });
+  }
+});
+
+// POST /api/messages/:id/reply — envoie un email de réponse au client
+router.post("/:id/reply", requireAuth, async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { replyText } = req.body;
+    if (!replyText || !String(replyText).trim()) {
+      return res.status(400).json({ error: "Le texte de la réponse est requis." });
+    }
+
+    const msg = await getMessageById(req.params.id);
+    if (!msg) return res.status(404).json({ error: "Message introuvable." });
+
+    await sendReply(msg.email, msg.name, String(replyText).trim());
+
+    // Passer automatiquement le message en statut "traité"
+    await updateMessageStatus(req.params.id, "traité");
+
+    return res.json({
+      success: true,
+      message: `Réponse envoyée à ${msg.email}`,
+    });
+  } catch (err: any) {
+    console.error("Reply email error:", err);
+    return res.status(500).json({
+      error: "Erreur lors de l'envoi de la réponse. Vérifiez la configuration SMTP.",
+    });
   }
 });
 

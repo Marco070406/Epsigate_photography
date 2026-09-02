@@ -15,14 +15,14 @@ import {
 
 const heroSlides = [
   {
-    subtitle: "Studio de photographie professionnelle — Lomé, Togo",
+    subtitle: "Studio de photographie professionnelle - Lomé, Togo",
     titlePart1: "Excellence visuelle & ",
     titleHighlight: "créativité",
     description:
       "Chez Epsigate, nous transformons chaque instant en une œuvre intemporelle. Notre studio basé à Lomé allie savoir-faire technique de pointe et sensibilité artistique.",
     image: "/hero-studio.jpg",
     badgeCategory: "Studio & Lumière",
-    badgeLabel: "Plateau professionnel — Lomé, Togo",
+    badgeLabel: "Plateau professionnel - Lomé, Togo",
   },
   {
     subtitle: "Shooting Haute Couture & Lookbook",
@@ -163,6 +163,7 @@ export default function Home() {
                   width={800}
                   height={600}
                   priority
+                  style={{ width: "100%", height: "auto", display: "block" }}
                 />
                 <div className="hero-badge-overlay">
                   <span className="hero-badge-category">

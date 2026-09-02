@@ -22,7 +22,7 @@ const jost = Jost({
 
 export const metadata: Metadata = {
   title: {
-    default: "Epsigate Photography — Studio de photographie professionnelle",
+    default: "Epsigate Photography - Studio de photographie professionnelle",
     template: "%s | Epsigate Photography",
   },
   description:
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Epsigate Photography",
     description:
-      "Studio de photographie professionnelle — Excellence visuelle & créativité",
+      "Studio de photographie professionnelle - Excellence visuelle & créativité",
     type: "website",
   },
 };

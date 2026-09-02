@@ -334,6 +334,11 @@ export async function deleteMessage(id: string): Promise<boolean> {
   return rows.length > 0;
 }
 
+export async function getMessageById(id: string): Promise<MessageItem | null> {
+  const row = await queryOne("SELECT * FROM messages WHERE id=$1", [id]);
+  return row ? mapMessage(row) : null;
+}
+
 // ─── Settings ─────────────────────────────────────────────────────────────────
 
 export async function getSiteSettings(): Promise<SiteSettings> {

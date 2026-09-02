@@ -144,6 +144,12 @@ export default function AdminPage() {
   const [pinChangeError, setPinChangeError] = useState("");
   const [pinChangeSuccess, setPinChangeSuccess] = useState("");
 
+  // Reply email state
+  const [replyOpen, setReplyOpen] = useState(false);
+  const [replyText, setReplyText] = useState("");
+  const [replySending, setReplySending] = useState(false);
+  const [replyError, setReplyError] = useState("");
+
   // Check existing session
   useEffect(() => {
     const token = getAdminToken();
@@ -334,6 +340,39 @@ export default function AdminPage() {
       }
     } catch {
       showToast("Erreur lors de la suppression");
+    }
+  };
+
+  const handleSendReply = async (id: string) => {
+    if (!replyText.trim()) {
+      setReplyError("Le texte de la réponse ne peut pas être vide.");
+      return;
+    }
+    setReplySending(true);
+    setReplyError("");
+    try {
+      const res = await fetch(`${API_BASE_URL}/messages/${id}/reply`, {
+        method: "POST",
+        headers: writeHeaders(),
+        body: JSON.stringify({ replyText }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setReplyOpen(false);
+        setReplyText("");
+        // Mettre à jour le statut localement
+        setMessages((prev) => prev.map((m) => m.id === id ? { ...m, status: "traité" } : m));
+        if (selectedMessage && selectedMessage.id === id) {
+          setSelectedMessage({ ...selectedMessage, status: "traité" });
+        }
+        showToast(`Réponse envoyée à ${selectedMessage?.email}`);
+      } else {
+        setReplyError(data.error || "Erreur lors de l'envoi de la réponse.");
+      }
+    } catch {
+      setReplyError("Impossible de joindre le serveur. Vérifiez votre connexion.");
+    } finally {
+      setReplySending(false);
     }
   };
 
@@ -944,8 +983,6 @@ export default function AdminPage() {
                           {new Date(msg.createdAt).toLocaleDateString("fr-FR", {
                             day: "2-digit",
                             month: "short",
-                            hour: "2-digit",
-                            minute: "2-digit",
                           })}
                         </td>
                         <td>
@@ -1001,7 +1038,7 @@ export default function AdminPage() {
                         <td>
                           <div className="action-btn-group">
                             <button
-                              onClick={() => setSelectedMessage(msg)}
+                              onClick={() => { setSelectedMessage(msg); setReplyOpen(false); setReplyError(""); }}
                               className="icon-btn"
                               title="Lire le message complet"
                             >
@@ -1581,7 +1618,7 @@ export default function AdminPage() {
           <div className="settings-card" style={{ marginTop: "28px" }}>
             <h2 className="admin-card-title" style={{ marginBottom: "20px" }}>
               <Lock size={18} color="#d4af37" />
-              <span>Sécurité — Changer le Code PIN Administrateur</span>
+              <span>Sécurité - Changer le Code PIN Administrateur</span>
             </h2>
 
             <form onSubmit={handleChangePin}>
@@ -1758,13 +1795,10 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    const subject = encodeURIComponent(
-                      `Epsigate Photography - Votre demande : ${selectedMessage.service}`
+                    setReplyText(
+                      `Bonjour ${selectedMessage.name},\n\nMerci pour votre demande concernant "${selectedMessage.service}".\n\nNous avons bien pris en compte votre message et nous revenons vers vous dans les plus brefs délais.\n\nCordialement,\nL'équipe Epsigate Photography\nLomé, Togo`
                     );
-                    const body = encodeURIComponent(
-                      `Bonjour ${selectedMessage.name},\n\nMerci pour votre demande concernant "${selectedMessage.service}".\n\nNous avons bien pris en compte votre message et nous revenons vers vous dans les plus brefs delais.\n\nCordialement,\nL'equipe Epsigate Photography\nLome, Togo`
-                    );
-                    window.location.href = `mailto:${selectedMessage.email}?subject=${subject}&body=${body}`;
+                    setReplyOpen(true);
                   }}
                   className="btn btn-outline"
                   style={{
@@ -1779,6 +1813,60 @@ export default function AdminPage() {
                   <span>Répondre par Email</span>
                 </button>
               </div>
+
+              {/* ── Panneau de réponse par email ── */}
+              {replyOpen && (
+                <div
+                  style={{
+                    marginTop: "16px",
+                    background: "rgba(0,0,0,0.25)",
+                    border: "1px solid rgba(212,175,55,0.25)",
+                    borderRadius: "8px",
+                    padding: "16px",
+                  }}
+                >
+                  <p style={{ fontSize: "0.82rem", color: "#a39ba2", marginBottom: "8px" }}>
+                    Réponse envoyée à : <strong style={{ color: "#ffffff" }}>{selectedMessage.email}</strong>
+                  </p>
+                  <textarea
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    rows={7}
+                    style={{
+                      width: "100%",
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      borderRadius: "6px",
+                      color: "#ffffff",
+                      fontSize: "0.88rem",
+                      padding: "10px 12px",
+                      resize: "vertical",
+                      lineHeight: 1.6,
+                      boxSizing: "border-box",
+                    }}
+                  />
+                  {replyError && (
+                    <p style={{ color: "#fca5a5", fontSize: "0.82rem", marginTop: "6px" }}>{replyError}</p>
+                  )}
+                  <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
+                    <button
+                      onClick={() => handleSendReply(selectedMessage.id)}
+                      disabled={replySending}
+                      className="btn btn-primary"
+                      style={{ display: "inline-flex", gap: "6px", alignItems: "center" }}
+                    >
+                      <Mail size={14} />
+                      <span>{replySending ? "Envoi en cours…" : "Envoyer la réponse"}</span>
+                    </button>
+                    <button
+                      onClick={() => { setReplyOpen(false); setReplyError(""); }}
+                      className="btn btn-outline"
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <div
                 style={{

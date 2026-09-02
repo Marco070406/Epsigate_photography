@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, Suspense, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
@@ -31,8 +31,8 @@ function ContactPageInner() {
     phone: "+228 90 00 00 00 / +228 22 21 00 00",
     whatsapp: "+228 90 00 00 00",
     email: "contact@epsigate-photography.com",
-    weekdayHours: "Lundi – Vendredi : 08:30 – 18:30",
-    saturdayHours: "Samedi : 09:00 – 18:00 (Shooting sur réservation)",
+    weekdayHours: "Lundi - Vendredi : 08:30 - 18:30",
+    saturdayHours: "Samedi : 09:00 - 18:00 (Shooting sur réservation)",
     responseDelay: "Engagement sous 24h ouvrées maximum",
     mapEmbedUrl:
       "https://maps.google.com/maps?q=6.1844304,1.1966077&z=17&ie=UTF8&iwloc=&output=embed",
@@ -364,6 +364,7 @@ function ContactPageInner() {
                     type="date"
                     id="date"
                     className="form-input"
+                    min={new Date().toISOString().split("T")[0]}
                     value={formData.date}
                     onChange={(e) =>
                       setFormData({ ...formData, date: e.target.value })

@@ -112,7 +112,7 @@ export default function AboutPage() {
               « Chaque photographie est un dialogue silencieux entre la lumière,
               le sujet et l'instant suspendu. »
               <span style={{ display: "block", marginTop: "8px", fontSize: "0.88rem", fontWeight: 600, color: "var(--burgundy)" }}>
-                — Éléonore Puget, Fondatrice
+                - Éléonore Puget, Fondatrice
               </span>
             </div>
           </div>

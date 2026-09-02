@@ -44,7 +44,7 @@ const initialPortfolioItems: PortfolioItem[] = [
   },
   {
     id: 5,
-    title: "Flacon Aurora — Eau de Parfum",
+    title: "Flacon Aurora - Eau de Parfum",
     category: "Commercial",
     src: "/commercial.jpg",
     description: "Packshot publicitaire de luxe sur socle de marbre et rétroéclairage rubis.",

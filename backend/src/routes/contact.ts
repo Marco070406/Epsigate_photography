@@ -1,10 +1,11 @@
 import { Router, Request, Response } from "express";
 import { addMessage } from "../data/db";
+import { sendContactConfirmation, sendAdminNotification } from "../lib/mailer";
 
 const router = Router();
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_RE = /^[+\d][\d\s\-().]{6,20}$/;
+const PHONE_RE = /^.{6,30}$/;
 
 router.post("/", async (req: Request, res: Response): Promise<any> => {
   try {
@@ -34,6 +35,14 @@ router.post("/", async (req: Request, res: Response): Promise<any> => {
       service: String(service || "autre").trim(),
       date:    date ? String(date).trim() : undefined,
       message: String(message).trim(),
+    });
+
+    // Envoi des emails en arrière-plan (non bloquant pour la réponse HTTP)
+    Promise.all([
+      sendContactConfirmation(saved),
+      sendAdminNotification(saved),
+    ]).catch((err) => {
+      console.error("Email sending error:", err);
     });
 
     return res.status(201).json({
