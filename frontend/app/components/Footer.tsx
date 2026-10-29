@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MapPin, Phone, Mail } from "lucide-react";
+import { MapPin, Phone, Mail, Lock } from "lucide-react";
 import {
   InstagramIcon,
   FacebookIcon,
@@ -142,6 +142,10 @@ export default function Footer() {
             © {new Date().getFullYear()} Epsigate Photography - Lomé, Togo. Tous droits
             réservés. Studio de photographie d’art & commerciale.
           </p>
+          <Link href="/admin" className="footer-admin-link" prefetch={false}>
+            <Lock size={12} aria-hidden="true" />
+            Espace administration
+          </Link>
         </div>
       </div>
     </footer>

@@ -1518,6 +1518,24 @@ h6 {
   color: rgba(255, 255, 255, 0.65);
 }
 
+/* Discreet entry point to the back-office */
+.footer-admin-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 6px 4px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-admin-link:hover,
+.footer-admin-link:focus-visible {
+  color: rgba(255, 255, 255, 0.85);
+}
+
 /* ===== ANIMATIONS ===== */
 @keyframes fadeInUp {
   from {
