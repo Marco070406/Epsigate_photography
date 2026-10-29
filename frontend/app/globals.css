@@ -127,7 +127,7 @@ h6 {
   right: 0;
   z-index: 100;
   /* Slightly translucent so the blur shows the page scrolling underneath */
-  background: color-mix(in srgb, var(--bg-primary) 88%, transparent);
+  background: color-mix(in srgb, var(--bg-primary) 96%, transparent);
   border-bottom: 1px solid var(--border-light);
   transition: background var(--transition-base), border-color var(--transition-base),
     box-shadow var(--transition-base);
