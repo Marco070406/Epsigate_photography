@@ -6,15 +6,19 @@ import { getAdminToken, safeEqual } from "../routes/auth";
  * The frontend sends the token in the Authorization header:
  *   Authorization: Bearer <token>
  */
-export function requireAuth(req: Request, res: Response, next: NextFunction): any {
-  const authHeader = req.headers.authorization || "";
-  const token = authHeader.startsWith("Bearer ")
-    ? authHeader.slice(7).trim()
-    : "";
+export async function requireAuth(req: Request, res: Response, next: NextFunction): Promise<any> {
+  try {
+    const authHeader = req.headers.authorization || "";
+    const token = authHeader.startsWith("Bearer ")
+      ? authHeader.slice(7).trim()
+      : "";
 
-  if (!token || !safeEqual(token, getAdminToken())) {
-    return res.status(401).json({ error: "Accès non autorisé." });
+    if (!token || !safeEqual(token, await getAdminToken())) {
+      return res.status(401).json({ error: "Accès non autorisé." });
+    }
+
+    next();
+  } catch {
+    return res.status(500).json({ error: "Erreur lors de la vérification de l'accès." });
   }
-
-  next();
 }

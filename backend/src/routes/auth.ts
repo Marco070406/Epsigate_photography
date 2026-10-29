@@ -1,13 +1,22 @@
 import { Router, Request, Response } from "express";
 import crypto from "crypto";
-import fs from "fs";
-import path from "path";
+import { query, queryOne } from "../data/database";
 import { requireAuth } from "../middleware/requireAuth";
 
 const router = Router();
 
-/** Current PIN — read on each call so a PIN change takes effect immediately. */
-function getAdminPin(): string {
+/**
+ * Current PIN: the one saved from the admin (admin_config table) wins,
+ * otherwise ADMIN_PIN from the environment. Stored in the database so that a
+ * PIN change survives restarts and applies to every serverless instance.
+ */
+async function getAdminPin(): Promise<string> {
+  try {
+    const row = await queryOne<{ pin: string }>("SELECT pin FROM admin_config WHERE id = 1");
+    if (row?.pin) return row.pin;
+  } catch (err) {
+    console.error("Could not read admin_config, falling back to ADMIN_PIN:", (err as Error).message);
+  }
   return process.env.ADMIN_PIN || "EPSIGATE2024";
 }
 
@@ -16,8 +25,8 @@ function getAdminPin(): string {
  * into the PIN and it changes (invalidating every session) when the PIN changes.
  * Set ADMIN_TOKEN_SECRET in .env to make it unpredictable even if the PIN leaks.
  */
-export function getAdminToken(): string {
-  const pin = getAdminPin();
+export async function getAdminToken(): Promise<string> {
+  const pin = await getAdminPin();
   const secret = process.env.ADMIN_TOKEN_SECRET || pin;
   return crypto.createHmac("sha256", secret).update(`epsigate-admin:${pin}`).digest("hex");
 }
@@ -30,6 +39,7 @@ export function safeEqual(a: string, b: string): boolean {
 }
 
 // ─── Brute-force protection ───────────────────────────────────────────────────
+// In-memory, so per instance on Vercel: it slows attacks down without being a hard limit.
 
 const MAX_ATTEMPTS = 5;
 const LOCK_WINDOW_MS = 15 * 60 * 1000;
@@ -56,7 +66,7 @@ function recordFailure(ip: string): void {
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
-router.post("/login", (req: Request, res: Response): any => {
+router.post("/login", async (req: Request, res: Response): Promise<any> => {
   try {
     const ip = req.ip || "unknown";
     if (isLocked(ip)) {
@@ -67,7 +77,7 @@ router.post("/login", (req: Request, res: Response): any => {
 
     const { code } = req.body;
 
-    if (!code || !safeEqual(String(code).trim(), getAdminPin())) {
+    if (!code || !safeEqual(String(code).trim(), await getAdminPin())) {
       recordFailure(ip);
       return res.status(401).json({
         error: "Code d'accès administrateur incorrect.",
@@ -78,7 +88,7 @@ router.post("/login", (req: Request, res: Response): any => {
     return res.status(200).json({
       success: true,
       message: "Authentification réussie.",
-      token: getAdminToken(),
+      token: await getAdminToken(),
     });
   } catch {
     return res.status(500).json({ error: "Erreur lors de l'authentification." });
@@ -90,7 +100,7 @@ router.post("/login", (req: Request, res: Response): any => {
  * Body: { currentPin: string, newPin: string }
  * Requires a valid Bearer token (the admin must be logged in).
  */
-router.post("/change-pin", requireAuth, (req: Request, res: Response): any => {
+router.post("/change-pin", requireAuth, async (req: Request, res: Response): Promise<any> => {
   try {
     const { currentPin, newPin } = req.body;
 
@@ -102,49 +112,26 @@ router.post("/change-pin", requireAuth, (req: Request, res: Response): any => {
     const trimmedNew = String(newPin).trim();
 
     // Verify current PIN
-    if (!safeEqual(trimmedCurrent, getAdminPin())) {
+    if (!safeEqual(trimmedCurrent, await getAdminPin())) {
       return res.status(401).json({ error: "Code actuel incorrect." });
     }
 
-    // Validate new PIN (6–64 chars, no whitespace so it cannot break the .env file)
+    // Validate new PIN (6–64 chars, no whitespace)
     if (!/^\S{6,64}$/.test(trimmedNew)) {
       return res.status(400).json({
         error: "Le nouveau code doit contenir entre 6 et 64 caractères, sans espace.",
       });
     }
 
-    // Update the running process env so it takes effect immediately
-    process.env.ADMIN_PIN = trimmedNew;
-
-    // Persist in the .env file (may fail on read-only hosting)
-    let persisted = true;
-    try {
-      const envPath = path.resolve(process.cwd(), ".env");
-      let envContent = "";
-
-      if (fs.existsSync(envPath)) {
-        envContent = fs.readFileSync(envPath, "utf-8");
-        // Replace existing ADMIN_PIN line
-        if (/^ADMIN_PIN=.*/m.test(envContent)) {
-          envContent = envContent.replace(/^ADMIN_PIN=.*/m, () => `ADMIN_PIN=${trimmedNew}`);
-        } else {
-          envContent += `\nADMIN_PIN=${trimmedNew}\n`;
-        }
-      } else {
-        envContent = `ADMIN_PIN=${trimmedNew}\n`;
-      }
-
-      fs.writeFileSync(envPath, envContent, "utf-8");
-    } catch (err) {
-      persisted = false;
-      console.error("Could not persist ADMIN_PIN to .env:", err);
-    }
+    await query(
+      `INSERT INTO admin_config (id, pin) VALUES (1, $1)
+       ON CONFLICT (id) DO UPDATE SET pin = EXCLUDED.pin, updated_at = NOW()`,
+      [trimmedNew]
+    );
 
     return res.status(200).json({
       success: true,
-      message: persisted
-        ? "Code PIN mis à jour. Reconnectez-vous avec votre nouveau code."
-        : "Code PIN mis à jour jusqu'au prochain redémarrage du serveur : pensez à modifier ADMIN_PIN chez votre hébergeur.",
+      message: "Code PIN mis à jour. Reconnectez-vous avec votre nouveau code.",
     });
   } catch (err) {
     console.error("Error changing PIN:", err);

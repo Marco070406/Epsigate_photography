@@ -1,15 +1,26 @@
-import { Pool } from "pg";
+import { Pool, type PoolConfig } from "pg";
 import dotenv from "dotenv";
 
 dotenv.config();
 
+// Hosted databases (Neon via Vercel…) provide a single connection string,
+// local development uses the separate DB_* variables.
+const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+
+const connection: PoolConfig = connectionString
+  ? { connectionString }
+  : {
+      host:     process.env.DB_HOST     || "localhost",
+      port:     Number(process.env.DB_PORT) || 5432,
+      database: process.env.DB_NAME     || "epsigate_db",
+      user:     process.env.DB_USER     || "postgres",
+      password: process.env.DB_PASSWORD || "postgres",
+    };
+
 export const pool = new Pool({
-  host:     process.env.DB_HOST     || "localhost",
-  port:     Number(process.env.DB_PORT) || 5432,
-  database: process.env.DB_NAME     || "epsigate_db",
-  user:     process.env.DB_USER     || "postgres",
-  password: process.env.DB_PASSWORD || "postgres",
-  max: 10,
+  ...connection,
+  // Serverless functions run many small instances: keep few connections each
+  max: process.env.VERCEL ? 3 : 10,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
   // Force UTF-8 client encoding

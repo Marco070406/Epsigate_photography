@@ -7,9 +7,11 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "seed": "ts-node src/data/seed.ts"
+    "seed": "ts-node src/data/seed.ts",
+    "db:init": "tsc && node dist/data/init-db.js"
   },
   "dependencies": {
+    "@vercel/blob": "^2.8.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",

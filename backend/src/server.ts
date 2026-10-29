@@ -24,9 +24,9 @@ const CORS_ORIGINS = (process.env.CORS_ORIGIN || "http://localhost:3000")
   .map((o) => o.trim().replace(/\/$/, ""))
   .filter(Boolean);
 
-// Ensure uploads folder exists
+// Ensure uploads folder exists (local only: Vercel's filesystem is read-only)
 const uploadsPath = path.resolve(process.cwd(), "uploads");
-if (!fs.existsSync(uploadsPath)) {
+if (!process.env.VERCEL && !fs.existsSync(uploadsPath)) {
   fs.mkdirSync(uploadsPath, { recursive: true });
 }
 
@@ -77,7 +77,7 @@ app.use((_req, res) => {
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof multer.MulterError) {
     const message =
-      err.code === "LIMIT_FILE_SIZE" ? "Image trop volumineuse (25 Mo maximum)." : "Erreur lors du téléversement.";
+      err.code === "LIMIT_FILE_SIZE" ? "Image trop volumineuse." : "Erreur lors du téléversement.";
     return res.status(400).json({ error: message });
   }
   if (err?.type === "entity.parse.failed") {
@@ -93,7 +93,12 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   return res.status(500).json({ error: "Erreur interne du serveur." });
 });
 
-app.listen(PORT, () => {
-  console.log(`✨ Serveur Backend Epsigate démarré sur http://localhost:${PORT}`);
-  console.log(`📁 Fichiers téléversés servis sur http://localhost:${PORT}/uploads`);
-});
+// On Vercel the exported app runs as a function; locally we start an HTTP server
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`✨ Serveur Backend Epsigate démarré sur http://localhost:${PORT}`);
+    console.log(`📁 Fichiers téléversés servis sur http://localhost:${PORT}/uploads`);
+  });
+}
+
+export default app;

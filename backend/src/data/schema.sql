@@ -80,6 +80,14 @@ CREATE TABLE IF NOT EXISTS stats (
   category_breakdown      JSONB   DEFAULT '[]'
 );
 
+-- Admin config (single row): PIN changed from the admin panel
+-- (when empty, the ADMIN_PIN environment variable is used)
+CREATE TABLE IF NOT EXISTS admin_config (
+  id          INTEGER      PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  pin         VARCHAR(64)  NOT NULL,
+  updated_at  TIMESTAMPTZ  DEFAULT NOW()
+);
+
 -- ============================================================
 -- SEED DATA
 -- ============================================================

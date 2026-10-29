@@ -52,13 +52,15 @@ router.post("/", async (req: Request, res: Response): Promise<any> => {
       message: String(message).trim(),
     });
 
-    // Envoi des emails en arrière-plan (non bloquant pour la réponse HTTP)
-    Promise.all([
+    // Emails envoyés avant de répondre : sur Vercel la fonction peut être suspendue
+    // dès la réponse envoyée. Un échec d'envoi n'empêche pas l'enregistrement.
+    const results = await Promise.allSettled([
       sendContactConfirmation(saved),
       sendAdminNotification(saved),
-    ]).catch((err) => {
-      console.error("Email sending error:", err);
-    });
+    ]);
+    for (const r of results) {
+      if (r.status === "rejected") console.error("Email sending error:", r.reason);
+    }
 
     return res.status(201).json({
       success: true,
