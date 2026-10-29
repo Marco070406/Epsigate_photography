@@ -66,6 +66,16 @@ function labelOf(map: Record<string, string>, key: string): string {
   return map[key?.toLowerCase()] || key || "–";
 }
 
+/** Escapes user-supplied text before inserting it into an HTML email. */
+function esc(value: string | undefined | null): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 // ─── Shared layout wrapper ────────────────────────────────────────────────────
 
 function layout(title: string, body: string): string {
@@ -115,19 +125,19 @@ function layout(title: string, body: string): string {
 
 function confirmationHtml(msg: MessageItem): string {
   const body = `
-    <h2>Bonjour ${msg.name},</h2>
+    <h2>Bonjour ${esc(msg.name)},</h2>
     <p>Nous avons bien reçu votre demande et nous vous en remercions.</p>
     <p>Notre équipe prendra contact avec vous dans les <strong class="gold">24 à 48 heures</strong> pour donner suite à votre projet.</p>
 
     <table class="field-table">
-      <tr><td>Nature de la demande</td><td>${labelOf(PURPOSE_LABELS, msg.purpose)}</td></tr>
-      <tr><td>Prestation souhaitée</td><td>${labelOf(SERVICE_LABELS, msg.service)}</td></tr>
-      ${msg.date ? `<tr><td>Date envisagée</td><td>${msg.date}</td></tr>` : ""}
-      <tr><td>Téléphone renseigné</td><td>${msg.phone}</td></tr>
+      <tr><td>Nature de la demande</td><td>${esc(labelOf(PURPOSE_LABELS, msg.purpose))}</td></tr>
+      <tr><td>Prestation souhaitée</td><td>${esc(labelOf(SERVICE_LABELS, msg.service))}</td></tr>
+      ${msg.date ? `<tr><td>Date envisagée</td><td>${esc(msg.date)}</td></tr>` : ""}
+      <tr><td>Téléphone renseigné</td><td>${esc(msg.phone)}</td></tr>
     </table>
 
     <p style="color:#a39ba2;font-size:0.85rem;">Votre message :</p>
-    <div class="message-box">${msg.message}</div>
+    <div class="message-box">${esc(msg.message)}</div>
 
     <p>Pour toute urgence, vous pouvez également nous joindre directement sur WhatsApp.</p>
     <p>À très bientôt,<br/><strong class="gold">L'équipe Epsigate Photography</strong></p>`;
@@ -162,21 +172,21 @@ function notificationHtml(msg: MessageItem, adminUrl: string): string {
     <p>Un client vient de soumettre une demande via le formulaire de contact.</p>
 
     <table class="field-table">
-      <tr><td>Nom</td><td>${msg.name}</td></tr>
-      <tr><td>Email</td><td>${msg.email}</td></tr>
-      <tr><td>Téléphone</td><td>${msg.phone}</td></tr>
-      <tr><td>Nature</td><td>${labelOf(PURPOSE_LABELS, msg.purpose)}</td></tr>
-      <tr><td>Prestation</td><td>${labelOf(SERVICE_LABELS, msg.service)}</td></tr>
-      ${msg.date ? `<tr><td>Date souhaitée</td><td>${msg.date}</td></tr>` : ""}
+      <tr><td>Nom</td><td>${esc(msg.name)}</td></tr>
+      <tr><td>Email</td><td>${esc(msg.email)}</td></tr>
+      <tr><td>Téléphone</td><td>${esc(msg.phone)}</td></tr>
+      <tr><td>Nature</td><td>${esc(labelOf(PURPOSE_LABELS, msg.purpose))}</td></tr>
+      <tr><td>Prestation</td><td>${esc(labelOf(SERVICE_LABELS, msg.service))}</td></tr>
+      ${msg.date ? `<tr><td>Date souhaitée</td><td>${esc(msg.date)}</td></tr>` : ""}
       <tr><td>Reçu le</td><td>${new Date(msg.createdAt).toLocaleString("fr-FR", { timeZone: "Africa/Lome" })}</td></tr>
     </table>
 
     <p style="color:#a39ba2;font-size:0.85rem;">Message du client :</p>
-    <div class="message-box">${msg.message}</div>
+    <div class="message-box">${esc(msg.message)}</div>
 
     <a href="${adminUrl}" class="cta">Ouvrir dans l'administration →</a>`;
 
-  return layout(`[Nouveau devis] ${msg.name} – ${msg.service}`, body);
+  return layout(`[Nouveau devis] ${esc(msg.name)} – ${esc(labelOf(SERVICE_LABELS, msg.service))}`, body);
 }
 
 function notificationText(msg: MessageItem): string {
@@ -197,8 +207,8 @@ ${msg.message}`;
 function replyHtml(clientName: string, replyText: string): string {
   const body = `
     <h2>Réponse d'Epsigate Photography</h2>
-    <p>Bonjour ${clientName},</p>
-    <div class="message-box">${replyText.replace(/\n/g, "<br/>")}</div>
+    <p>Bonjour ${esc(clientName)},</p>
+    <div class="message-box">${esc(replyText).replace(/\n/g, "<br/>")}</div>
     <p>N'hésitez pas à nous contacter si vous avez d'autres questions.</p>
     <p>Cordialement,<br/><strong class="gold">L'équipe Epsigate Photography</strong></p>`;
 

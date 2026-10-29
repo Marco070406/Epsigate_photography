@@ -3,6 +3,13 @@ import { getPortfolio, addPortfolioItem, updatePortfolioItem, deletePortfolioIte
 import { requireAuth } from "../middleware/requireAuth";
 
 const router = Router();
+// "Tous" is only a UI filter, not a storable category (see schema.sql CHECK)
+const CATEGORIES: Category[] = ["Mariage", "Mode", "Portrait", "Événementiel", "Commercial", "Studio"];
+
+function parseId(raw: string): number | null {
+  const id = Number(raw);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
 
 router.get("/", async (_req: Request, res: Response): Promise<any> => {
   try {
@@ -18,6 +25,8 @@ router.post("/", requireAuth, async (req: Request, res: Response): Promise<any> 
     const { title, category, src, description, featured } = req.body;
     if (!title || !category || !src)
       return res.status(400).json({ error: "Titre, catégorie et image requis." });
+    if (!CATEGORIES.includes(category))
+      return res.status(400).json({ error: "Catégorie invalide." });
     const newItem = await addPortfolioItem({
       title: String(title).trim(), category: category as Category,
       src: String(src).trim(), description: String(description || "").trim(),
@@ -31,8 +40,12 @@ router.post("/", requireAuth, async (req: Request, res: Response): Promise<any> 
 
 router.put("/:id", requireAuth, async (req: Request, res: Response): Promise<any> => {
   try {
+    const id = parseId(req.params.id);
+    if (id === null) return res.status(404).json({ error: "Photo introuvable." });
     const { title, category, src, description, featured } = req.body;
-    const updated = await updatePortfolioItem(Number(req.params.id), {
+    if (category !== undefined && !CATEGORIES.includes(category))
+      return res.status(400).json({ error: "Catégorie invalide." });
+    const updated = await updatePortfolioItem(id, {
       ...(title !== undefined && { title: String(title).trim() }),
       ...(category !== undefined && { category: category as Category }),
       ...(src !== undefined && { src: String(src).trim() }),
@@ -48,7 +61,9 @@ router.put("/:id", requireAuth, async (req: Request, res: Response): Promise<any
 
 router.delete("/:id", requireAuth, async (req: Request, res: Response): Promise<any> => {
   try {
-    const deleted = await deletePortfolioItem(Number(req.params.id));
+    const id = parseId(req.params.id);
+    if (id === null) return res.status(404).json({ error: "Photo introuvable." });
+    const deleted = await deletePortfolioItem(id);
     if (!deleted) return res.status(404).json({ error: "Photo introuvable." });
     return res.json({ success: true, message: "Photo supprimée avec succès." });
   } catch {

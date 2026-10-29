@@ -212,10 +212,10 @@ export default function ServicesPage() {
       {/* ===== FINAL SERVICES CTA ===== */}
       <section className="services-cta" id="services-cta">
         <div className="container">
-          <h2 className="section-title">Besoin d'une formule sur-mesure ?</h2>
+          <h2 className="section-title">Besoin d’une formule sur-mesure ?</h2>
           <p className="services-cta-description">
             Nous élaborons des devis personnalisés adaptés aux contraintes
-            spécifiques de votre projet, au Togo comme à l'international.
+            spécifiques de votre projet, au Togo comme à l’international.
           </p>
           <div className="services-cta-buttons">
             <Link href="/contact" className="btn btn-primary" id="cta-services-quote">

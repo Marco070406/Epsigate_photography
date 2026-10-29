@@ -22,7 +22,6 @@ import {
   Phone,
   Save,
   X,
-  Camera,
   AlertCircle,
   Search,
   Briefcase,
@@ -150,16 +149,6 @@ export default function AdminPage() {
   const [replySending, setReplySending] = useState(false);
   const [replyError, setReplyError] = useState("");
 
-  // Check existing session
-  useEffect(() => {
-    const token = getAdminToken();
-    const session = localStorage.getItem("epsigate_admin_session");
-    if (session === "active" && token) {
-      setIsAuthenticated(true);
-      fetchAllData();
-    }
-  }, []);
-
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => {
@@ -167,7 +156,8 @@ export default function AdminPage() {
     }, 3500);
   };
 
-  const fetchAllData = async () => {
+  /** Loads all admin data. Returns false when the stored token is rejected. */
+  const fetchAllData = async (): Promise<boolean> => {
     const authHeader = writeHeaders();
     try {
       const [resMsg, resPort, resServ, resTeam, resSet] = await Promise.all([
@@ -178,6 +168,12 @@ export default function AdminPage() {
         fetch(`${API_BASE_URL}/settings`),
       ]);
 
+      if (resMsg.status === 401) {
+        // Token expired or PIN changed: force a new login
+        clearAdminToken();
+        setIsAuthenticated(false);
+        return false;
+      }
       if (resMsg.ok) {
         const d = await resMsg.json();
         setMessages(d.data || []);
@@ -213,10 +209,29 @@ export default function AdminPage() {
           aboutStory: "",
         });
       }
+      return true;
     } catch (err) {
       console.error("Error loading admin data:", err);
+      return false;
     }
   };
+
+  // Restore an existing session once the stored token is confirmed valid
+  useEffect(() => {
+    const token = getAdminToken();
+    const session = localStorage.getItem("epsigate_admin_session");
+    if (session !== "active" || !token) return;
+    fetch(`${API_BASE_URL}/messages`, { headers: writeHeaders() })
+      .then((res) => {
+        if (res.ok) {
+          setIsAuthenticated(true);
+          fetchAllData();
+        } else if (res.status === 401) {
+          clearAdminToken();
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -760,7 +775,7 @@ export default function AdminPage() {
           </div>
           <h1 className="admin-auth-title">Epsigate Photography</h1>
           <p className="admin-auth-desc">
-            Accès sécurisé réservé à l'équipe d'administration du studio.
+            Accès sécurisé réservé à l’équipe d’administration du studio.
           </p>
 
           <form onSubmit={handleLogin} className="admin-auth-form">
@@ -781,7 +796,7 @@ export default function AdminPage() {
                   marginBottom: "6px",
                 }}
               >
-                Code d'accès administrateur
+                Code d’accès administrateur
               </label>
               <input
                 id="admin-pin"
@@ -879,7 +894,7 @@ export default function AdminPage() {
               className={`admin-tab-btn ${activeTab === "team" ? "active" : ""}`}
             >
               <Users size={16} />
-              <span>L'Équipe ({team.length})</span>
+              <span>L’Équipe ({team.length})</span>
             </button>
 
             <button
@@ -1242,7 +1257,7 @@ export default function AdminPage() {
             <div className="admin-toolbar">
               <div>
                 <h2 style={{ fontSize: "1.2rem", fontWeight: 600, color: "#ffffff" }}>
-                  Membres de l'Équipe & Photographes
+                  Membres de l’Équipe & Photographes
                 </h2>
                 <p style={{ fontSize: "0.85rem", color: "#a39ba2" }}>
                   Téléversez des portraits ou renseignez des biographies pour la page À propos.
@@ -1418,7 +1433,7 @@ export default function AdminPage() {
                 </div>
 
                 <div className="form-group-admin">
-                  <label className="form-label-admin">Zone d'intervention</label>
+                  <label className="form-label-admin">Zone d’intervention</label>
                   <input
                     type="text"
                     value={settings.zone}
@@ -1498,7 +1513,7 @@ export default function AdminPage() {
                 </div>
 
                 <div className="form-group-admin">
-                  <label className="form-label-admin">Texte d'introduction Hero</label>
+                  <label className="form-label-admin">Texte d’introduction Hero</label>
                   <textarea
                     rows={3}
                     value={settings.heroSubtitle}
@@ -1520,7 +1535,7 @@ export default function AdminPage() {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
                   <div>
                     <div className="form-group-admin">
-                      <label className="form-label-admin">Lien direct d'itinéraire (Google Maps)</label>
+                      <label className="form-label-admin">Lien direct d’itinéraire (Google Maps)</label>
                       <input
                         type="text"
                         placeholder="https://maps.google.com/?q=..."
@@ -1533,7 +1548,7 @@ export default function AdminPage() {
                     </div>
 
                     <div className="form-group-admin">
-                      <label className="form-label-admin">URL d'intégration de la carte (Iframe / Embed)</label>
+                      <label className="form-label-admin">URL d’intégration de la carte (Iframe / Embed)</label>
                       <div style={{ display: "flex", gap: "8px", marginBottom: "6px" }}>
                         <input
                           type="text"
@@ -2055,7 +2070,7 @@ export default function AdminPage() {
               </div>
 
               <div className="form-group-admin">
-                <label className="form-label-admin">Description de l'offre</label>
+                <label className="form-label-admin">Description de l’offre</label>
                 <textarea
                   rows={3}
                   placeholder="Description détaillée de l'expérience et du déroulement..."
@@ -2129,7 +2144,7 @@ export default function AdminPage() {
 
             <form onSubmit={handleSavePhoto}>
               <div className="form-group-admin">
-                <label className="form-label-admin">Titre de l'œuvre *</label>
+                <label className="form-label-admin">Titre de l’œuvre *</label>
                 <input
                   type="text"
                   required

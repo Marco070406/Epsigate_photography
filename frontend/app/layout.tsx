@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Cormorant_Garamond, Jost } from "next/font/google";
 import "./globals.css";
-import ThemeProvider from "./components/ThemeProvider";
+import ThemeProvider, { themeInitScript } from "./components/ThemeProvider";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 
@@ -52,6 +52,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body>
         <ThemeProvider>
           <Header />

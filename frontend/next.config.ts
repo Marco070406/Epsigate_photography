@@ -1,6 +1,12 @@
+import path from "path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Monorepo with one lockfile per package: pin the root to this app,
+  // otherwise Turbopack picks the parent folder and next/font fails to resolve.
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
   images: {
     unoptimized: true,
     remotePatterns: [

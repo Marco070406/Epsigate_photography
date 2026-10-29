@@ -161,7 +161,7 @@ export default function PortfolioPage() {
           <h1 className="page-header-title">Notre Portfolio</h1>
           <p className="page-header-description">
             Explorez nos créations photographiques à travers nos différents
-            univers. Cliquez sur chaque cliché pour l'afficher en plein écran.
+            univers. Cliquez sur chaque cliché pour l’afficher en plein écran.
           </p>
         </div>
       </section>

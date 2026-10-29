@@ -140,7 +140,7 @@ export default function Footer() {
         <div className="footer-bottom">
           <p className="footer-copy" suppressHydrationWarning>
             © {new Date().getFullYear()} Epsigate Photography - Lomé, Togo. Tous droits
-            réservés. Studio de photographie d'art & commerciale.
+            réservés. Studio de photographie d’art & commerciale.
           </p>
         </div>
       </div>

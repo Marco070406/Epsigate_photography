@@ -2,7 +2,13 @@
  * db.ts — Data access layer (PostgreSQL)
  * All functions are async and use the shared connection pool.
  */
+import crypto from "crypto";
 import { query, queryOne } from "./database";
+
+/** Unique id: Date.now() alone collides when two requests arrive in the same millisecond. */
+function newId(prefix: string): string {
+  return `${prefix}-${Date.now()}-${crypto.randomBytes(3).toString("hex")}`;
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -216,7 +222,7 @@ export async function getServices(): Promise<ServiceItem[]> {
 export async function addService(
   data: Omit<ServiceItem, "id" | "createdAt">
 ): Promise<ServiceItem> {
-  const id = `service-${Date.now()}`;
+  const id = newId("service");
   const rows = await query(
     `INSERT INTO services (id, title, badge, image, description, advantages, price)
      VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
@@ -262,7 +268,7 @@ export async function getTeam(): Promise<TeamMember[]> {
 export async function addTeamMember(
   data: Omit<TeamMember, "id" | "createdAt">
 ): Promise<TeamMember> {
-  const id = `member-${Date.now()}`;
+  const id = newId("member");
   const rows = await query(
     `INSERT INTO team (id, name, role, initials, bio, photo)
      VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
@@ -307,14 +313,12 @@ export async function getMessages(): Promise<MessageItem[]> {
 export async function addMessage(
   data: Omit<MessageItem, "id" | "status" | "createdAt">
 ): Promise<MessageItem> {
-  const id = `msg-${Date.now()}`;
+  const id = newId("msg");
   const rows = await query(
     `INSERT INTO messages (id, name, email, phone, purpose, service, date, message)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
     [id, data.name, data.email, data.phone, data.purpose, data.service, data.date ?? null, data.message]
   );
-  // Increment totalQuotes in stats
-  await query("UPDATE stats SET monthly_visits = monthly_visits WHERE id = 1").catch(() => {});
   return mapMessage(rows[0]);
 }
 
@@ -378,9 +382,9 @@ export async function updateSiteSettings(
   let i = 1;
   for (const [key, col] of Object.entries(map)) {
     const val = (updates as any)[key];
-    if (val !== undefined) {
+    if (val !== undefined && val !== null) {
       fields.push(`${col}=$${i++}`);
-      values.push(val);
+      values.push(String(val).trim());
     }
   }
   if (fields.length === 0) return getSiteSettings();

@@ -5,7 +5,11 @@ import { sendContactConfirmation, sendAdminNotification } from "../lib/mailer";
 const router = Router();
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_RE = /^.{6,30}$/;
+const PHONE_RE = /^[0-9+()./\s-]{6,30}$/;
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+// Max lengths aligned with the database columns
+const MAX = { name: 255, email: 255, purpose: 50, service: 50, message: 5000 };
 
 router.post("/", async (req: Request, res: Response): Promise<any> => {
   try {
@@ -27,13 +31,24 @@ router.post("/", async (req: Request, res: Response): Promise<any> => {
       return res.status(400).json({ error: "Numéro de téléphone invalide." });
     }
 
+    if (String(name).trim().length > MAX.name || String(email).trim().length > MAX.email) {
+      return res.status(400).json({ error: "Nom ou email trop long." });
+    }
+
+    if (String(message).trim().length > MAX.message) {
+      return res.status(400).json({ error: `Le message ne doit pas dépasser ${MAX.message} caractères.` });
+    }
+
+    const trimmedDate = date ? String(date).trim() : "";
+
     const saved = await addMessage({
       name:    String(name).trim(),
       email:   String(email).trim().toLowerCase(),
       phone:   String(phone).trim(),
-      purpose: String(purpose || "devis").trim(),
-      service: String(service || "autre").trim(),
-      date:    date ? String(date).trim() : undefined,
+      purpose: String(purpose || "devis").trim().slice(0, MAX.purpose),
+      service: String(service || "autre").trim().slice(0, MAX.service),
+      // Invalid dates are ignored rather than crashing the DATE column insert
+      date:    DATE_RE.test(trimmedDate) && !isNaN(Date.parse(trimmedDate)) ? trimmedDate : undefined,
       message: String(message).trim(),
     });
 

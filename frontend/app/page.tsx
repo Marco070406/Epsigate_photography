@@ -191,15 +191,15 @@ export default function Home() {
             </div>
 
             <div>
-              <p className="page-header-subtitle">L'esprit Epsigate</p>
+              <p className="page-header-subtitle">L’esprit Epsigate</p>
               <h2 className="section-title" style={{ textAlign: "left" }}>
-                La passion de l'image d'exception
+                La passion de l’image d’exception
               </h2>
               <p style={{ color: "var(--text-secondary)", lineHeight: "1.8", marginBottom: "18px" }}>
                 Fondé au cœur de <strong>Lomé, Togo</strong>, <strong>Epsigate Photography</strong> est
-                un studio dédié à l'excellence visuelle et au luxe contemporain. Nous croyons que la
-                lumière façonne les souvenirs et sublime les identités, qu'il
-                s'agisse d'un moment de vie ou d'une marque de prestige.
+                un studio dédié à l’excellence visuelle et au luxe contemporain. Nous croyons que la
+                lumière façonne les souvenirs et sublime les identités, qu’il
+                s’agisse d’un moment de vie ou d’une marque de prestige.
               </p>
 
               <div className="values-grid-4">
@@ -393,7 +393,7 @@ export default function Home() {
         <div className="container">
           <h2 className="section-title">Prêt à donner vie à votre vision ?</h2>
           <p className="services-cta-description">
-            Contactez notre studio à Lomé dès aujourd'hui pour échanger sur vos envies,
+            Contactez notre studio à Lomé dès aujourd’hui pour échanger sur vos envies,
             réserver une date ou obtenir un devis personnalisé sous 24h.
           </p>
           <div className="services-cta-buttons">

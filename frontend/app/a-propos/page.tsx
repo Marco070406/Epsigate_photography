@@ -80,10 +80,10 @@ export default function AboutPage() {
       <section className="page-header" id="about-header">
         <div className="container">
           <p className="page-header-subtitle">Notre Histoire & Philosophie</p>
-          <h1 className="page-header-title">L'Âme d'Epsigate</h1>
+          <h1 className="page-header-title">L’Âme d’Epsigate</h1>
           <p className="page-header-description">
-            Bienvenue dans notre univers à Lomé où l'art de la photographie
-            rencontre l'exigence du luxe et la spontanéité de l'émotion.
+            Bienvenue dans notre univers à Lomé où l’art de la photographie
+            rencontre l’exigence du luxe et la spontanéité de l’émotion.
           </p>
         </div>
       </section>
@@ -94,23 +94,23 @@ export default function AboutPage() {
           <div>
             <p className="page-header-subtitle">Genèse du Studio</p>
             <h2 className="section-title" style={{ textAlign: "left" }}>
-              Capturer la lumière, révéler l'intemporel
+              Capturer la lumière, révéler l’intemporel
             </h2>
             <p style={{ color: "var(--text-secondary)", lineHeight: "1.8", marginBottom: "16px" }}>
-              Né d'une passion inconditionnelle pour le portrait et
-              les jeux de clair-obscur, <strong>Epsigate Photography</strong> s'est
+              Né d’une passion inconditionnelle pour le portrait et
+              les jeux de clair-obscur, <strong>Epsigate Photography</strong> s’est
               imposé comme un studio de référence à <strong>Lomé, Togo</strong> et dans la sous-région ouest-africaine.
             </p>
             <p style={{ color: "var(--text-secondary)", lineHeight: "1.8" }}>
               Notre démarche repose sur une alchimie subtile : une maîtrise
               technique rigoureuse associée à une liberté créative totale. Nous
-              façonnons des images vibrantes, empreintes d'élégance et de
+              façonnons des images vibrantes, empreintes d’élégance et de
               profondeur, destinées à traverser le temps.
             </p>
 
             <div className="founder-quote-box">
               « Chaque photographie est un dialogue silencieux entre la lumière,
-              le sujet et l'instant suspendu. »
+              le sujet et l’instant suspendu. »
               <span style={{ display: "block", marginTop: "8px", fontSize: "0.88rem", fontWeight: 600, color: "var(--burgundy)" }}>
                 - Éléonore Puget, Fondatrice
               </span>
@@ -160,10 +160,10 @@ export default function AboutPage() {
           <p className="page-header-subtitle" style={{ textAlign: "center" }}>
             Talents & Passion
           </p>
-          <h2 className="section-title">L'Équipe du Studio</h2>
+          <h2 className="section-title">L’Équipe du Studio</h2>
           <p className="section-intro-text">
             Des professionnels dévoués à la perfection de chaque projet, de la
-            prise de vue initiale jusqu'au tirage d'art final.
+            prise de vue initiale jusqu’au tirage d’art final.
           </p>
 
           <div className="team-grid">

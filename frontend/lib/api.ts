@@ -44,7 +44,7 @@ export function resolveImageUrl(src: string | undefined | null, fallback = "/wed
 
 // ─── Generic fetch wrapper ────────────────────────────────────────────────────
 
-export async function fetchApi<T = any>(
+export async function fetchApi<T = unknown>(
   endpoint: string,
   options?: RequestInit
 ): Promise<{ ok: boolean; data?: T; error?: string }> {

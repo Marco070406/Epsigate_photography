@@ -4,6 +4,7 @@ import { requireAuth } from "../middleware/requireAuth";
 import { sendReply } from "../lib/mailer";
 
 const router = Router();
+const MESSAGE_STATUSES: MessageStatus[] = ["nouveau", "traité", "archivé"];
 
 router.get("/", requireAuth, async (_req: Request, res: Response): Promise<any> => {
   try {
@@ -16,7 +17,7 @@ router.get("/", requireAuth, async (_req: Request, res: Response): Promise<any> 
 router.patch("/:id", requireAuth, async (req: Request, res: Response): Promise<any> => {
   try {
     const { status } = req.body;
-    if (!status) return res.status(400).json({ error: "Statut requis." });
+    if (!MESSAGE_STATUSES.includes(status)) return res.status(400).json({ error: "Statut invalide." });
     const updated = await updateMessageStatus(req.params.id, status as MessageStatus);
     if (!updated) return res.status(404).json({ error: "Message introuvable." });
     return res.json({ success: true, data: updated });

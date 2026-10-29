@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { ADMIN_TOKEN } from "../routes/auth";
+import { getAdminToken, safeEqual } from "../routes/auth";
 
 /**
  * Middleware that protects write endpoints (POST / PUT / DELETE).
@@ -12,7 +12,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): an
     ? authHeader.slice(7).trim()
     : "";
 
-  if (!token || token !== ADMIN_TOKEN) {
+  if (!token || !safeEqual(token, getAdminToken())) {
     return res.status(401).json({ error: "Accès non autorisé." });
   }
 

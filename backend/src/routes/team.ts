@@ -16,7 +16,11 @@ router.post("/", requireAuth, async (req: Request, res: Response): Promise<any> 
   try {
     const { name, role, initials, bio, photo } = req.body;
     if (!name || !role) return res.status(400).json({ error: "Nom et rôle requis." });
-    const calculatedInitials = initials || name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
+    const calculatedInitials = (
+      initials
+        ? String(initials).trim()
+        : String(name).trim().split(/\s+/).map((n: string) => n[0]).join("").toUpperCase()
+    ).slice(0, 10); // initials column is VARCHAR(10)
     const newMember = await addTeamMember({
       name: String(name).trim(), role: String(role).trim(),
       initials: calculatedInitials, bio: String(bio || "").trim(),
@@ -34,7 +38,7 @@ router.put("/:id", requireAuth, async (req: Request, res: Response): Promise<any
     const updated = await updateTeamMember(req.params.id, {
       ...(name !== undefined && { name: String(name).trim() }),
       ...(role !== undefined && { role: String(role).trim() }),
-      ...(initials !== undefined && { initials: String(initials).trim() }),
+      ...(initials !== undefined && { initials: String(initials).trim().slice(0, 10) }),
       ...(bio !== undefined && { bio: String(bio).trim() }),
       ...(photo !== undefined && { photo: String(photo).trim() }),
     });

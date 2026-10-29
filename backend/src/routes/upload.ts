@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import crypto from "crypto";
 import { requireAuth } from "../middleware/requireAuth";
 
 const router = Router();
@@ -11,21 +12,34 @@ if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
+// Extension derived from the MIME type: a file named "x.html" can never be served as HTML
+const EXTENSIONS: Record<string, string> = {
+  "image/jpeg": ".jpg",
+  "image/jpg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "image/avif": ".avif",
+  "image/gif": ".gif",
+};
+
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => { cb(null, UPLOADS_DIR); },
   filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const sanitizedBase = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_-]/g, "_").toLowerCase();
-    cb(null, `${sanitizedBase}-${Date.now()}-${Math.round(Math.random() * 1e4)}${ext || ".jpg"}`);
+    const ext = EXTENSIONS[file.mimetype.toLowerCase()] || ".jpg";
+    const sanitizedBase =
+      path.basename(file.originalname, path.extname(file.originalname))
+        .replace(/[^a-zA-Z0-9_-]/g, "_").toLowerCase().slice(0, 60) || "image";
+    cb(null, `${sanitizedBase}-${Date.now()}-${crypto.randomBytes(4).toString("hex")}${ext}`);
   },
 });
 
 const fileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/avif", "image/gif"];
-  if (allowed.includes(file.mimetype.toLowerCase())) {
+  if (EXTENSIONS[file.mimetype.toLowerCase()]) {
     cb(null, true);
   } else {
-    cb(new Error("Format non supporté. Choisissez une image JPG, PNG, WebP ou AVIF."));
+    const err = new Error("Format non supporté. Choisissez une image JPG, PNG, WebP ou AVIF.") as Error & { status: number };
+    err.status = 400;
+    cb(err);
   }
 };
 

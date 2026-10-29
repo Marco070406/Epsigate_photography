@@ -62,9 +62,11 @@ function ContactPageInner() {
   }, []);
 
   // Sync service field when URL param changes (e.g. direct deep-link)
-  useEffect(() => {
+  const [prevServiceParam, setPrevServiceParam] = useState(serviceParam);
+  if (serviceParam !== prevServiceParam) {
+    setPrevServiceParam(serviceParam);
     setFormData((prev) => ({ ...prev, service: serviceParam }));
-  }, [serviceParam]);
+  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -102,8 +104,8 @@ function ContactPageInner() {
           <h1 className="page-header-title">Contact & Réservation</h1>
           <p className="page-header-description">
             Notre studio vous accueille sur rendez-vous à Lomé et se déplace
-            dans tout le Togo, la sous-région et à l'international pour vos projets
-            d'exception.
+            dans tout le Togo, la sous-région et à l’international pour vos projets
+            d’exception.
           </p>
         </div>
       </section>
@@ -117,7 +119,7 @@ function ContactPageInner() {
             <div className="whatsapp-box">
               <div className="whatsapp-box-text">
                 <h2 style={{ fontSize: "1.15rem", fontWeight: 600, color: "var(--text-primary)", marginBottom: "4px" }}>
-                  Besoin d'une réponse rapide ?
+                  Besoin d’une réponse rapide ?
                 </h2>
                 <p>Échangez directement avec notre équipe sur WhatsApp.</p>
               </div>
@@ -152,7 +154,7 @@ function ContactPageInner() {
                     <Globe size={20} strokeWidth={1.8} />
                   </span>
                   <div>
-                    <span className="contact-item-label">Zone d'intervention</span>
+                    <span className="contact-item-label">Zone d’intervention</span>
                     <p className="contact-item-value">{settings.zone}</p>
                   </div>
                 </div>
@@ -236,7 +238,7 @@ function ContactPageInner() {
                   Votre demande a bien été transmise !
                 </h3>
                 <p style={{ fontSize: "0.92rem", opacity: 0.9 }}>
-                  Merci {formData.name}. L'équipe d'Epsigate Photography à Lomé vous
+                  Merci {formData.name}. L’équipe d’Epsigate Photography à Lomé vous
                   recontactera sous 24h pour finaliser votre projet.
                 </p>
               </div>
@@ -324,6 +326,9 @@ function ContactPageInner() {
                       id="phone"
                       required
                       placeholder="+228 90 12 34 56"
+                      maxLength={30}
+                      pattern="[0-9\s+\(\)\.\/\-]{6,30}"
+                      title="Chiffres, espaces et + ( ) - . uniquement"
                       className="form-input"
                       value={formData.phone}
                       onChange={(e) =>
@@ -380,6 +385,7 @@ function ContactPageInner() {
                     id="message"
                     required
                     rows={4}
+                    maxLength={5000}
                     placeholder="Décrivez vos attentes, l'ambiance souhaitée, le lieu ou les dates clés..."
                     className="form-textarea"
                     value={formData.message}
@@ -464,7 +470,7 @@ function ContactPageInner() {
                   alignItems: "center",
                 }}
               >
-                <span>Ouvrir l'itinéraire Google Maps</span>
+                <span>Ouvrir l’itinéraire Google Maps</span>
                 <ExternalLink size={14} />
               </a>
             </div>
