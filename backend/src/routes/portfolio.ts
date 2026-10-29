@@ -3,7 +3,7 @@ import { getPortfolio, addPortfolioItem, updatePortfolioItem, deletePortfolioIte
 import { requireAuth } from "../middleware/requireAuth";
 
 const router = Router();
-// "Tous" is only a UI filter, not a storable category (see schema.sql CHECK)
+// "Tous" is only a UI filter, not a storable category (see schema.ts CHECK)
 const CATEGORIES: Category[] = ["Mariage", "Mode", "Portrait", "Événementiel", "Commercial", "Studio"];
 
 function parseId(raw: string): number | null {

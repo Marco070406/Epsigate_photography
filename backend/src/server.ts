@@ -15,6 +15,7 @@ import teamRoutes from "./routes/team";
 import settingsRoutes from "./routes/settings";
 import statsRoutes from "./routes/stats";
 import uploadRoutes from "./routes/upload";
+import { ensureSchema } from "./data/migrate";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -55,6 +56,11 @@ app.use(
 // Health Check
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "Epsigate Photography Backend API", timestamp: new Date().toISOString() });
+});
+
+// Create missing tables (and seed an empty database) before the first API call
+app.use("/api", (_req, _res, next) => {
+  ensureSchema().then(() => next(), next);
 });
 
 // Routes — auth is handled per-method inside each router

@@ -1,4 +1,9 @@
--- ============================================================
+/**
+ * schema.ts — Schéma PostgreSQL et données de départ.
+ * En TypeScript (et non en .sql) pour être inclus dans la fonction Vercel.
+ */
+
+export const SCHEMA_SQL = `-- ============================================================
 -- EPSIGATE PHOTOGRAPHY — Schema PostgreSQL
 -- ============================================================
 
@@ -87,12 +92,10 @@ CREATE TABLE IF NOT EXISTS admin_config (
   pin         VARCHAR(64)  NOT NULL,
   updated_at  TIMESTAMPTZ  DEFAULT NOW()
 );
+`;
 
--- ============================================================
--- SEED DATA
--- ============================================================
-
-INSERT INTO portfolio (title, category, src, description, featured) VALUES
+// Données de départ : insérées une seule fois, sur une base vide
+export const SEED_SQL = `INSERT INTO portfolio (title, category, src, description, featured) VALUES
   ('Mariage au Domaine des Étoiles',      'Mariage',       '/wedding.jpg',           'Élégance gothique et lumières tamisées pour une union royale.',                true),
   ('Collection Soie & Pourpre',            'Mode',          '/fashion.jpg',           'Shooting éditorial haute couture, drapé architectural et clair-obscur.',      true),
   ('Portrait Dirigeante d''Entreprise',    'Portrait',      '/portrait.jpg',          'Éclairage doux et posture charismatique en boiseries d''époque.',              true),
@@ -170,3 +173,4 @@ VALUES (
   '[{"month":"Jan","visits":2100,"inquiries":24},{"month":"Fév","visits":2650,"inquiries":31},{"month":"Mar","visits":3100,"inquiries":38},{"month":"Avr","visits":3400,"inquiries":42},{"month":"Mai","visits":3840,"inquiries":48}]',
   '[{"category":"Mariage","count":42},{"category":"Mode","count":28},{"category":"Portrait","count":20},{"category":"Événementiel","count":18},{"category":"Commercial","count":12},{"category":"Studio","count":15}]'
 );
+`;
