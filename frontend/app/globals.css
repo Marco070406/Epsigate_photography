@@ -140,12 +140,6 @@ h6 {
   border-bottom-color: transparent;
 }
 
-.header-cta {
-  padding: 9px 18px;
-  font-size: 0.85rem;
-  border-radius: 12px;
-}
-
 .header-inner {
   display: flex;
   align-items: center;
@@ -1813,13 +1807,6 @@ textarea:focus-visible {
   }
 }
 
-/* Not enough room for links + quote button: the button returns in the mobile menu */
-@media (max-width: 960px) {
-  .header-cta {
-    display: none;
-  }
-}
-
 @media (max-width: 768px) {
   .hero-slider-container {
     grid-template-columns: 1fr;
@@ -1910,11 +1897,6 @@ textarea:focus-visible {
 
   .nav-mobile .nav-link.nav-link-active {
     background: color-mix(in srgb, var(--burgundy) 9%, transparent);
-  }
-
-  .nav-mobile-cta {
-    margin-top: 10px;
-    width: 100%;
   }
 
   .services-preview-grid,

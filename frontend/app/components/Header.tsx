@@ -64,9 +64,6 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
-          <Link href="/contact" className="btn btn-primary header-cta" id="header-cta">
-            Devis gratuit
-          </Link>
           <button
             className="theme-toggle"
             onClick={toggleTheme}
@@ -113,9 +110,6 @@ export default function Header() {
             {link.label}
           </Link>
         ))}
-        <Link href="/contact" className="btn btn-primary nav-mobile-cta" onClick={closeMobileNav}>
-          Demander un devis gratuit
-        </Link>
       </nav>
     </header>
   );
