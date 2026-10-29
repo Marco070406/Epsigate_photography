@@ -92,12 +92,67 @@ export async function fetchApi<T = unknown>(
 
 // ─── Upload helper ────────────────────────────────────────────────────────────
 
+// The server accepts up to 4 MB (Vercel limit): bigger photos are shrunk in the browser
+const MAX_UPLOAD_BYTES = 3.5 * 1024 * 1024;
+// Wide enough for full-screen display on large and high-density screens
+const MAX_DIMENSION = 2560;
+
+function canvasToJpeg(canvas: HTMLCanvasElement, quality: number): Promise<Blob | null> {
+  return new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+}
+
+/**
+ * Resizes and recompresses a photo that is too large or too heavy (camera and
+ * phone photos are often 5–15 MB). Small files, GIFs and images the browser
+ * cannot decode are sent unchanged.
+ */
+export async function prepareImageForUpload(file: File): Promise<File> {
+  if (file.type === "image/gif" || typeof createImageBitmap !== "function") return file;
+
+  let bitmap: ImageBitmap;
+  try {
+    // Applies the EXIF orientation, so portrait phone photos stay upright
+    bitmap = await createImageBitmap(file);
+  } catch {
+    return file;
+  }
+
+  const scale = Math.min(1, MAX_DIMENSION / Math.max(bitmap.width, bitmap.height));
+  if (scale === 1 && file.size <= MAX_UPLOAD_BYTES) {
+    bitmap.close();
+    return file;
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    bitmap.close();
+    return file;
+  }
+  // JPEG has no transparency: white background for PNGs
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+
+  for (const quality of [0.9, 0.82, 0.72]) {
+    const blob = await canvasToJpeg(canvas, quality);
+    if (blob && blob.size <= MAX_UPLOAD_BYTES) {
+      const name = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+      return new File([blob], name, { type: "image/jpeg" });
+    }
+  }
+  return file; // Still too heavy: the server answers with a clear message
+}
+
 export async function uploadImage(
   file: File
 ): Promise<{ ok: boolean; url?: string; error?: string }> {
   try {
     const formData = new FormData();
-    formData.append("image", file);
+    formData.append("image", await prepareImageForUpload(file));
 
     const res = await fetch(`${API_BASE_URL}/upload`, {
       method: "POST",
