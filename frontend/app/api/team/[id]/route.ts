@@ -1,6 +1,7 @@
 import { api, jsonError, readJson, type IdContext } from "@/lib/server/http";
 import { updateTeamMember, deleteTeamMember } from "@/lib/server/db";
 import { requireAdmin } from "@/lib/server/auth";
+import { invalidate } from "@/lib/server/cache";
 
 export const PUT = api(async (req: Request, { params }: IdContext) => {
   const denied = await requireAdmin(req);
@@ -15,6 +16,7 @@ export const PUT = api(async (req: Request, { params }: IdContext) => {
     ...(photo !== undefined && { photo: String(photo).trim() }),
   });
   if (!updated) return jsonError("Membre introuvable.", 404);
+  invalidate("team");
   return Response.json({ success: true, data: updated });
 }, "Erreur lors de la mise à jour.");
 
@@ -24,5 +26,6 @@ export const DELETE = api(async (req: Request, { params }: IdContext) => {
   const { id } = await params;
   const deleted = await deleteTeamMember(id);
   if (!deleted) return jsonError("Membre introuvable.", 404);
+  invalidate("team");
   return Response.json({ success: true, message: "Membre retiré de l'équipe." });
 }, "Erreur lors de la suppression.");

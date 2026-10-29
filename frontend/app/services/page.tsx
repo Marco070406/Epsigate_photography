@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Check, ArrowRight } from "lucide-react";
 import type { ServiceItem } from "@/lib/types";
-import { API_BASE_URL, resolveImageUrl } from "@/lib/api";
+import { API_BASE_URL, imageProps } from "@/lib/api";
 
 const initialServices: ServiceItem[] = [
   {
@@ -155,7 +155,7 @@ export default function ServicesPage() {
             >
               <div className="service-detail-image-box">
                 <Image
-                  src={resolveImageUrl(service.image, "/hero-studio.jpg")}
+                  {...imageProps(service.image, "/hero-studio.jpg")}
                   alt={service.title}
                   width={650}
                   height={480}

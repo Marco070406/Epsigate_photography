@@ -11,7 +11,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import type { TeamMember } from "@/lib/types";
-import { API_BASE_URL, resolveImageUrl } from "@/lib/api";
+import { API_BASE_URL, imageProps } from "@/lib/api";
 
 const values = [
   {
@@ -175,7 +175,7 @@ export default function AboutPage() {
                 >
                   {member.photo ? (
                     <Image
-                      src={resolveImageUrl(member.photo, "/portrait.jpg")}
+                      {...imageProps(member.photo, "/portrait.jpg")}
                       alt={member.name}
                       fill
                       style={{ objectFit: "cover" }}

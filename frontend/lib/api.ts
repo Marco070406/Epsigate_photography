@@ -43,6 +43,25 @@ export function resolveImageUrl(src: string | undefined | null, fallback = "/wed
   return trimmed;
 }
 
+/** Hosts that next/image may optimize (see images.remotePatterns in next.config.ts). */
+function canOptimizeImage(src: string): boolean {
+  if (src.startsWith("/")) return true;
+  try {
+    return new URL(src).hostname.endsWith(".public.blob.vercel-storage.com");
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Props for next/image: resolved src, and optimization (resizing, WebP) only for
+ * local and Vercel Blob images — other URLs typed in the admin are shown as-is.
+ */
+export function imageProps(src: string | undefined | null, fallback?: string): { src: string; unoptimized: boolean } {
+  const resolved = resolveImageUrl(src, fallback);
+  return { src: resolved, unoptimized: !canOptimizeImage(resolved) };
+}
+
 // ─── Generic fetch wrapper ────────────────────────────────────────────────────
 
 export async function fetchApi<T = unknown>(

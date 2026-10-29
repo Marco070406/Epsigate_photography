@@ -1,9 +1,10 @@
 import { api, jsonError, readJson } from "@/lib/server/http";
-import { getTeam, addTeamMember } from "@/lib/server/db";
+import { addTeamMember } from "@/lib/server/db";
+import { cachedTeam, invalidate } from "@/lib/server/cache";
 import { requireAdmin } from "@/lib/server/auth";
 
 export const GET = api(async () => {
-  return Response.json({ success: true, data: await getTeam() });
+  return Response.json({ success: true, data: await cachedTeam() });
 }, "Impossible de récupérer l'équipe.");
 
 export const POST = api(async (req: Request) => {
@@ -21,5 +22,6 @@ export const POST = api(async (req: Request) => {
     initials: calculatedInitials, bio: String(bio || "").trim(),
     photo: photo ? String(photo).trim() : undefined,
   });
+  invalidate("team");
   return Response.json({ success: true, data: newMember }, { status: 201 });
 }, "Erreur lors de l'ajout du membre.");

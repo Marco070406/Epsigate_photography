@@ -1,9 +1,14 @@
 import { api, jsonError, readJson } from "@/lib/server/http";
-import { clearFailures, clientIp, getAdminPin, getAdminToken, isLocked, recordFailure, safeEqual } from "@/lib/server/auth";
+import { clientIp, createAdminToken, getAdminPin, safeEqual } from "@/lib/server/auth";
+import { attempts, hit, reset } from "@/lib/server/rateLimit";
+
+// 5 wrong codes per IP lock the login for 15 minutes
+const MAX_ATTEMPTS = 5;
+const LOCK_SECONDS = 15 * 60;
 
 export const POST = api(async (req: Request) => {
-  const ip = clientIp(req);
-  if (isLocked(ip)) {
+  const key = `login:${clientIp(req)}`;
+  if ((await attempts(key)) >= MAX_ATTEMPTS) {
     return jsonError("Trop de tentatives échouées. Réessayez dans 15 minutes.", 429);
   }
 
@@ -11,14 +16,14 @@ export const POST = api(async (req: Request) => {
   const code = body?.code;
 
   if (!code || !safeEqual(String(code).trim(), await getAdminPin())) {
-    recordFailure(ip);
+    await hit(key, LOCK_SECONDS);
     return jsonError("Code d'accès administrateur incorrect.", 401);
   }
 
-  clearFailures(ip);
+  await reset(key);
   return Response.json({
     success: true,
     message: "Authentification réussie.",
-    token: await getAdminToken(),
+    token: await createAdminToken(),
   });
 }, "Erreur lors de l'authentification.");

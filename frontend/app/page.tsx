@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { imageProps } from "@/lib/api";
 import Link from "next/link";
 import {
   ChevronLeft,
@@ -364,7 +365,7 @@ export default function Home() {
                 className="home-gallery-item"
               >
                 <Image
-                  src={item.src}
+                  {...imageProps(item.src)}
                   alt={item.title}
                   width={400}
                   height={400}

@@ -40,7 +40,7 @@ import type {
   MessageStatus,
 } from "@/lib/types";
 
-import { API_BASE_URL, uploadImage, resolveImageUrl, saveAdminToken, clearAdminToken, getAdminToken } from "@/lib/api";
+import { API_BASE_URL, uploadImage, saveAdminToken, clearAdminToken, getAdminToken, imageProps } from "@/lib/api";
 
 /** Shorthand: headers for write requests */
 function writeHeaders(): Record<string, string> {
@@ -1107,7 +1107,7 @@ export default function AdminPage() {
                 <div key={service.id} className="admin-photo-card">
                   <div className="admin-photo-thumb">
                     <Image
-                      src={resolveImageUrl(service.image, "/hero-studio.jpg")}
+                      {...imageProps(service.image, "/hero-studio.jpg")}
                       alt={service.title}
                       fill
                       sizes="320px"
@@ -1210,7 +1210,7 @@ export default function AdminPage() {
                 <div key={item.id} className="admin-photo-card">
                   <div className="admin-photo-thumb">
                     <Image
-                      src={resolveImageUrl(item.src, "/wedding.jpg")}
+                      {...imageProps(item.src, "/wedding.jpg")}
                       alt={item.title}
                       fill
                       sizes="300px"
@@ -1299,7 +1299,7 @@ export default function AdminPage() {
                     >
                       {member.photo ? (
                         <Image
-                          src={resolveImageUrl(member.photo, "/portrait.jpg")}
+                          {...imageProps(member.photo, "/portrait.jpg")}
                           alt={member.name}
                           fill
                           sizes="60px"
@@ -2060,7 +2060,7 @@ export default function AdminPage() {
                   }}
                 >
                   <Image
-                    src={resolveImageUrl(serviceForm.customImage || serviceForm.image, "/hero-studio.jpg")}
+                    {...imageProps(serviceForm.customImage || serviceForm.image, "/hero-studio.jpg")}
                     alt="Aperçu"
                     fill
                     sizes="400px"
@@ -2249,7 +2249,7 @@ export default function AdminPage() {
                   }}
                 >
                   <Image
-                    src={resolveImageUrl(photoForm.customSrc || photoForm.src, "/wedding.jpg")}
+                    {...imageProps(photoForm.customSrc || photoForm.src, "/wedding.jpg")}
                     alt="Aperçu"
                     fill
                     sizes="400px"
@@ -2408,7 +2408,7 @@ export default function AdminPage() {
                     }}
                   >
                     <Image
-                      src={resolveImageUrl(teamForm.photo, "/portrait.jpg")}
+                      {...imageProps(teamForm.photo, "/portrait.jpg")}
                       alt="Portrait"
                       fill
                       sizes="80px"

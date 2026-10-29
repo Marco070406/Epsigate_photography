@@ -1,10 +1,11 @@
 import { api, jsonError, readJson } from "@/lib/server/http";
-import { getServices, addService } from "@/lib/server/db";
+import { addService } from "@/lib/server/db";
+import { cachedServices, invalidate } from "@/lib/server/cache";
 import { requireAdmin } from "@/lib/server/auth";
 import { cleanList } from "@/lib/server/validation";
 
 export const GET = api(async () => {
-  return Response.json({ success: true, data: await getServices() });
+  return Response.json({ success: true, data: await cachedServices() });
 }, "Impossible de récupérer les prestations.");
 
 export const POST = api(async (req: Request) => {
@@ -19,5 +20,6 @@ export const POST = api(async (req: Request) => {
     advantages: cleanList(advantages),
     price: String(price).trim(),
   });
+  invalidate("services");
   return Response.json({ success: true, data: newService }, { status: 201 });
 }, "Erreur lors de l'ajout de la prestation.");

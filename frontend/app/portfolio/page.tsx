@@ -11,7 +11,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import type { PortfolioItem, Category } from "@/lib/types";
-import { API_BASE_URL, resolveImageUrl } from "@/lib/api";
+import { API_BASE_URL, imageProps } from "@/lib/api";
 
 const initialPortfolioItems: PortfolioItem[] = [
   {
@@ -201,7 +201,7 @@ export default function PortfolioPage() {
             >
               <div className="portfolio-card-image">
                 <Image
-                  src={resolveImageUrl(item.src)}
+                  {...imageProps(item.src)}
                   alt={item.title}
                   width={600}
                   height={450}
@@ -258,7 +258,7 @@ export default function PortfolioPage() {
             {/* Image */}
             <div className="lightbox-image-holder">
               <Image
-                src={resolveImageUrl(currentItem.src)}
+                {...imageProps(currentItem.src)}
                 alt={currentItem.title}
                 width={1000}
                 height={750}

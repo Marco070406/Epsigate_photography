@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- raw SQL rows are untyped; mappers give them a type */
 import { Pool, type PoolConfig } from "pg";
+import { ensureSchema } from "./migrate";
 
 // Hosted databases (Neon via Vercel…) provide a single connection string,
 // local development uses the separate DB_* variables.
@@ -40,6 +41,8 @@ export async function query<T = any>(
   sql: string,
   params?: any[]
 ): Promise<T[]> {
+  // Creates the tables on an empty database before the first query of this instance
+  await ensureSchema();
   const client = await pool.connect();
   try {
     const result = await client.query(sql, params);

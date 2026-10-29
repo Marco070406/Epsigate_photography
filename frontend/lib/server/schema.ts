@@ -92,6 +92,14 @@ CREATE TABLE IF NOT EXISTS admin_config (
   pin         VARCHAR(64)  NOT NULL,
   updated_at  TIMESTAMPTZ  DEFAULT NOW()
 );
+
+-- Rate limits shared by every serverless instance (admin login, contact form)
+-- Keep this table last: migrate.ts checks for it to know the schema is up to date.
+CREATE TABLE IF NOT EXISTS rate_limits (
+  key       VARCHAR(100) PRIMARY KEY,
+  count     INTEGER      NOT NULL,
+  reset_at  TIMESTAMPTZ  NOT NULL
+);
 `;
 
 // Données de départ : insérées une seule fois, sur une base vide

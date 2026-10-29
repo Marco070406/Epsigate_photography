@@ -1,6 +1,6 @@
 /**
  * migrate.ts — Crée les tables manquantes et, sur une base vide, insère les données de départ.
- * Appelé automatiquement au premier appel API de chaque instance (voir server.ts).
+ * Appelé automatiquement avant la première requête SQL de chaque instance (voir database.ts).
  */
 import { pool } from "./database";
 import { SCHEMA_SQL, SEED_SQL } from "./schema";
@@ -13,6 +13,13 @@ let ready: Promise<void> | null = null;
 async function migrate(): Promise<void> {
   const client = await pool.connect();
   try {
+    // Fast path: rate_limits is the last table of SCHEMA_SQL, created in the same
+    // transaction as the seed, so its presence means the database is fully set up
+    // (one query per cold start). Add new tables before it, and move this check
+    // to the newest table, so existing databases get them too.
+    const check = await client.query("SELECT to_regclass('public.rate_limits') IS NOT NULL AS ready");
+    if (check.rows[0].ready) return;
+
     // Transaction-level lock: works through Neon's connection pooler
     await client.query("BEGIN");
     await client.query("SELECT pg_advisory_xact_lock($1)", [MIGRATION_LOCK_KEY]);

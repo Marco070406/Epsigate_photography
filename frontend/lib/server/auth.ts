@@ -1,9 +1,12 @@
 /**
- * auth.ts — Admin PIN, session token and brute-force protection.
+ * auth.ts — Admin PIN, expiring session tokens and client identification.
  */
 import crypto from "crypto";
 import { query, queryOne } from "./database";
 import { jsonError } from "./http";
+
+/** An admin session lasts 12 hours, then the admin must log in again. */
+const SESSION_SECONDS = 12 * 60 * 60;
 
 /**
  * Current PIN: the one saved from the admin (admin_config table) wins,
@@ -34,14 +37,27 @@ export async function setAdminPin(pin: string): Promise<void> {
 }
 
 /**
- * Session token derived from the PIN with HMAC-SHA256: it cannot be reversed
- * into the PIN and it changes (invalidating every session) when the PIN changes.
- * Set ADMIN_TOKEN_SECRET to make it unpredictable even if the PIN leaks.
+ * Signature keyed by the PIN (and ADMIN_TOKEN_SECRET when set): changing the PIN
+ * invalidates every session, and a token cannot be turned back into the PIN.
  */
-export async function getAdminToken(): Promise<string> {
+async function sign(expiresAt: number): Promise<string> {
   const pin = await getAdminPin();
   const secret = process.env.ADMIN_TOKEN_SECRET || pin;
-  return crypto.createHmac("sha256", secret).update(`epsigate-admin:${pin}`).digest("hex");
+  return crypto.createHmac("sha256", secret).update(`epsigate-admin:${pin}:${expiresAt}`).digest("hex");
+}
+
+/** New session token: "<expiry timestamp>.<signature>". */
+export async function createAdminToken(): Promise<string> {
+  const expiresAt = Math.floor(Date.now() / 1000) + SESSION_SECONDS;
+  return `${expiresAt}.${await sign(expiresAt)}`;
+}
+
+async function isValidToken(token: string): Promise<boolean> {
+  const [rawExpiry, signature] = token.split(".");
+  const expiresAt = Number(rawExpiry);
+  if (!Number.isInteger(expiresAt) || !signature) return false;
+  if (expiresAt < Date.now() / 1000) return false;
+  return safeEqual(signature, await sign(expiresAt));
 }
 
 /** Constant-time string comparison (avoids timing attacks). */
@@ -58,42 +74,17 @@ export function safeEqual(a: string, b: string): boolean {
 export async function requireAdmin(req: Request): Promise<Response | null> {
   const authHeader = req.headers.get("authorization") || "";
   const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
-  if (!token || !safeEqual(token, await getAdminToken())) {
+  if (!token || !(await isValidToken(token))) {
     return jsonError("Accès non autorisé.", 401);
   }
   return null;
 }
 
-// ─── Brute-force protection ───────────────────────────────────────────────────
-// In-memory, so per instance on Vercel: it slows attacks down without being a hard limit.
-
-const MAX_ATTEMPTS = 5;
-const LOCK_WINDOW_MS = 15 * 60 * 1000;
-const failedAttempts = new Map<string, { count: number; resetAt: number }>();
-
+/** Visitor IP as set by Vercel's edge (first x-forwarded-for entry). */
 export function clientIp(req: Request): string {
-  return req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
-}
-
-export function isLocked(ip: string): boolean {
-  const entry = failedAttempts.get(ip);
-  if (!entry) return false;
-  if (Date.now() > entry.resetAt) {
-    failedAttempts.delete(ip);
-    return false;
-  }
-  return entry.count >= MAX_ATTEMPTS;
-}
-
-export function recordFailure(ip: string): void {
-  const entry = failedAttempts.get(ip);
-  if (!entry || Date.now() > entry.resetAt) {
-    failedAttempts.set(ip, { count: 1, resetAt: Date.now() + LOCK_WINDOW_MS });
-  } else {
-    entry.count++;
-  }
-}
-
-export function clearFailures(ip: string): void {
-  failedAttempts.delete(ip);
+  return (
+    req.headers.get("x-real-ip") ||
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+    "unknown"
+  );
 }

@@ -1,10 +1,11 @@
 import { api, jsonError, readJson } from "@/lib/server/http";
-import { getPortfolio, addPortfolioItem } from "@/lib/server/db";
+import { addPortfolioItem } from "@/lib/server/db";
+import { cachedPortfolio, invalidate } from "@/lib/server/cache";
 import { requireAdmin } from "@/lib/server/auth";
 import { PORTFOLIO_CATEGORIES } from "@/lib/server/validation";
 
 export const GET = api(async () => {
-  return Response.json({ success: true, data: await getPortfolio() });
+  return Response.json({ success: true, data: await cachedPortfolio() });
 }, "Impossible de récupérer le portfolio.");
 
 export const POST = api(async (req: Request) => {
@@ -18,5 +19,6 @@ export const POST = api(async (req: Request) => {
     src: String(src).trim(), description: String(description || "").trim(),
     featured: Boolean(featured),
   });
+  invalidate("portfolio");
   return Response.json({ success: true, data: newItem }, { status: 201 });
 }, "Erreur lors de l'ajout au portfolio.");

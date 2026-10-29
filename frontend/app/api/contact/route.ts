@@ -1,6 +1,9 @@
 import { after } from "next/server";
 import { api, jsonError, readJson } from "@/lib/server/http";
 import { addMessage } from "@/lib/server/db";
+import { invalidate } from "@/lib/server/cache";
+import { clientIp } from "@/lib/server/auth";
+import { hit } from "@/lib/server/rateLimit";
 import { sendContactConfirmation, sendAdminNotification } from "@/lib/server/mailer";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -17,6 +20,11 @@ export const POST = api(async (req: Request) => {
 
   if (honeypot) {
     return Response.json({ success: true, message: "Demande reçue" });
+  }
+
+  // Anti-spam: at most 5 messages per IP every 10 minutes
+  if ((await hit(`contact:${clientIp(req)}`, 10 * 60)) > 5) {
+    return jsonError("Trop de messages envoyés. Réessayez dans quelques minutes.", 429);
   }
 
   if (!name || !email || !phone || !message) {
@@ -51,6 +59,9 @@ export const POST = api(async (req: Request) => {
     date:    DATE_RE.test(trimmedDate) && !isNaN(Date.parse(trimmedDate)) ? trimmedDate : undefined,
     message: String(message).trim(),
   });
+
+  // The stats count messages
+  invalidate("stats");
 
   // Emails sent after the response; after() keeps the function alive until they finish
   after(async () => {

@@ -1,6 +1,6 @@
 import { api } from "@/lib/server/http";
-import { getSiteStats } from "@/lib/server/db";
+import { cachedStats } from "@/lib/server/cache";
 
 export const GET = api(async () => {
-  return Response.json({ success: true, data: await getSiteStats() });
+  return Response.json({ success: true, data: await cachedStats() });
 }, "Impossible de récupérer les statistiques.");
