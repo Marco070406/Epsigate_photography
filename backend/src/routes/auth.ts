@@ -17,7 +17,12 @@ async function getAdminPin(): Promise<string> {
   } catch (err) {
     console.error("Could not read admin_config, falling back to ADMIN_PIN:", (err as Error).message);
   }
-  return process.env.ADMIN_PIN || "EPSIGATE2024";
+  if (process.env.ADMIN_PIN) return process.env.ADMIN_PIN;
+  // Never fall back to the well-known default PIN on a deployed server
+  if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+    throw new Error("ADMIN_PIN n'est pas configuré");
+  }
+  return "EPSIGATE2024";
 }
 
 /**
