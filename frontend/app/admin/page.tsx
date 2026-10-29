@@ -162,10 +162,10 @@ export default function AdminPage() {
     try {
       const [resMsg, resPort, resServ, resTeam, resSet] = await Promise.all([
         fetch(`${API_BASE_URL}/messages`, { headers: authHeader }),
-        fetch(`${API_BASE_URL}/portfolio`),
-        fetch(`${API_BASE_URL}/services`),
-        fetch(`${API_BASE_URL}/team`),
-        fetch(`${API_BASE_URL}/settings`),
+        fetch(`${API_BASE_URL}/portfolio?fresh=1`),
+        fetch(`${API_BASE_URL}/services?fresh=1`),
+        fetch(`${API_BASE_URL}/team?fresh=1`),
+        fetch(`${API_BASE_URL}/settings?fresh=1`),
       ]);
 
       if (resMsg.status === 401) {

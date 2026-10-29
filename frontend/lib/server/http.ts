@@ -16,6 +16,23 @@ export async function readJson(req: Request): Promise<Record<string, any> | null
   }
 }
 
+/**
+ * JSON for public reads, cached by Vercel's CDN close to visitors for 60 s
+ * (admin changes reach the public site within a minute). The admin asks with
+ * ?fresh=1 to bypass that cache and always see its own changes.
+ */
+export function publicJson(req: Request, data: unknown): Response {
+  const fresh = new URL(req.url).searchParams.has("fresh");
+  return Response.json(
+    { success: true, data },
+    {
+      headers: {
+        "Cache-Control": fresh ? "no-store" : "public, max-age=0, s-maxage=60, stale-while-revalidate=600",
+      },
+    }
+  );
+}
+
 /** Wraps a route handler: turns any unexpected error into a JSON 500 with the given French message. */
 export function api<C>(
   handler: (req: Request, ctx: C) => Promise<Response>,

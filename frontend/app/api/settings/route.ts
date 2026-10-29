@@ -1,10 +1,10 @@
-import { api, jsonError, readJson } from "@/lib/server/http";
+import { api, publicJson, jsonError, readJson } from "@/lib/server/http";
 import { updateSiteSettings } from "@/lib/server/db";
 import { cachedSettings, invalidate } from "@/lib/server/cache";
 import { requireAdmin } from "@/lib/server/auth";
 
-export const GET = api(async () => {
-  return Response.json({ success: true, data: await cachedSettings() });
+export const GET = api(async (req: Request) => {
+  return publicJson(req, await cachedSettings());
 }, "Impossible de récupérer les paramètres.");
 
 export const POST = api(async (req: Request) => {

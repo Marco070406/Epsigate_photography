@@ -1,11 +1,11 @@
-import { api, jsonError, readJson } from "@/lib/server/http";
+import { api, publicJson, jsonError, readJson } from "@/lib/server/http";
 import { addPortfolioItem } from "@/lib/server/db";
 import { cachedPortfolio, invalidate } from "@/lib/server/cache";
 import { requireAdmin } from "@/lib/server/auth";
 import { PORTFOLIO_CATEGORIES } from "@/lib/server/validation";
 
-export const GET = api(async () => {
-  return Response.json({ success: true, data: await cachedPortfolio() });
+export const GET = api(async (req: Request) => {
+  return publicJson(req, await cachedPortfolio());
 }, "Impossible de récupérer le portfolio.");
 
 export const POST = api(async (req: Request) => {

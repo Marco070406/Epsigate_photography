@@ -1,11 +1,11 @@
-import { api, jsonError, readJson } from "@/lib/server/http";
+import { api, publicJson, jsonError, readJson } from "@/lib/server/http";
 import { addService } from "@/lib/server/db";
 import { cachedServices, invalidate } from "@/lib/server/cache";
 import { requireAdmin } from "@/lib/server/auth";
 import { cleanList } from "@/lib/server/validation";
 
-export const GET = api(async () => {
-  return Response.json({ success: true, data: await cachedServices() });
+export const GET = api(async (req: Request) => {
+  return publicJson(req, await cachedServices());
 }, "Impossible de récupérer les prestations.");
 
 export const POST = api(async (req: Request) => {

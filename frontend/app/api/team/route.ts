@@ -1,10 +1,10 @@
-import { api, jsonError, readJson } from "@/lib/server/http";
+import { api, publicJson, jsonError, readJson } from "@/lib/server/http";
 import { addTeamMember } from "@/lib/server/db";
 import { cachedTeam, invalidate } from "@/lib/server/cache";
 import { requireAdmin } from "@/lib/server/auth";
 
-export const GET = api(async () => {
-  return Response.json({ success: true, data: await cachedTeam() });
+export const GET = api(async (req: Request) => {
+  return publicJson(req, await cachedTeam());
 }, "Impossible de récupérer l'équipe.");
 
 export const POST = api(async (req: Request) => {

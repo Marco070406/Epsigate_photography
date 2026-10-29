@@ -34,8 +34,6 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
-      // Admin and API responses must never be stored by shared caches
-      { source: "/api/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] },
       { source: "/admin", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
     ];
   },
