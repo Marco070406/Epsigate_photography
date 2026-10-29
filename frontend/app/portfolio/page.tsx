@@ -19,7 +19,7 @@ const initialPortfolioItems: PortfolioItem[] = [
     title: "Mariage au Domaine des Étoiles",
     category: "Mariage",
     src: "/wedding.jpg",
-    description: "Élégance gothique et lumières tamisées pour une union royale.",
+    description: "Sortie de cérémonie sous les applaudissements des proches, émotion et élégance.",
   },
   {
     id: 2,
@@ -40,7 +40,7 @@ const initialPortfolioItems: PortfolioItem[] = [
     title: "Gala Prestige Lomé 2024",
     category: "Événementiel",
     src: "/event.jpg",
-    description: "Atmosphère festive et lustres en cristal pour une soirée d'exception.",
+    description: "Élégance des tenues et des foulards wax lors d'une soirée de prestige à Lomé.",
   },
   {
     id: 5,
@@ -58,23 +58,23 @@ const initialPortfolioItems: PortfolioItem[] = [
   },
   {
     id: 7,
-    title: "Laboratoire de Retouche Numérique",
+    title: "Reportage en Coulisses",
     category: "Studio",
     src: "/about-photographer.jpg",
-    description: "Étalonnage colorimétrique haute fidélité en direct sur moniteur calibré.",
+    description: "Notre équipe en action pour saisir chaque instant, sur le vif.",
   },
   {
     id: 8,
     title: "Valse Nocturne & Féerie",
     category: "Mariage",
-    src: "/wedding.jpg",
-    description: "Moments d'émotions partagés dans un cadre architectural majestueux.",
+    src: "/wedding-2.jpg",
+    description: "Complicité des mariés dans un jardin tropical, à la tombée du jour.",
   },
   {
     id: 9,
     title: "Campagne Hivernal Haute Joaillerie",
     category: "Mode",
-    src: "/fashion.jpg",
+    src: "/fashion-2.jpg",
     description: "Mise en lumière des reflets et des matières nobles.",
   },
 ];

@@ -104,15 +104,15 @@ CREATE TABLE IF NOT EXISTS rate_limits (
 
 // Données de départ : insérées une seule fois, sur une base vide
 export const SEED_SQL = `INSERT INTO portfolio (title, category, src, description, featured) VALUES
-  ('Mariage au Domaine des Étoiles',      'Mariage',       '/wedding.jpg',           'Élégance gothique et lumières tamisées pour une union royale.',                true),
+  ('Mariage au Domaine des Étoiles',      'Mariage',       '/wedding.jpg',           'Sortie de cérémonie sous les applaudissements des proches, émotion et élégance.',                true),
   ('Collection Soie & Pourpre',            'Mode',          '/fashion.jpg',           'Shooting éditorial haute couture, drapé architectural et clair-obscur.',      true),
   ('Portrait Dirigeante d''Entreprise',    'Portrait',      '/portrait.jpg',          'Éclairage doux et posture charismatique en boiseries d''époque.',              true),
-  ('Gala Prestige Lomé 2024',              'Événementiel',  '/event.jpg',             'Atmosphère festive et lustres en cristal pour une soirée d''exception.',       false),
+  ('Gala Prestige Lomé 2024',              'Événementiel',  '/event.jpg',             'Élégance des tenues et des foulards wax lors d''une soirée de prestige à Lomé.',       false),
   ('Flacon Aurora — Eau de Parfum',        'Commercial',    '/commercial.jpg',        'Packshot publicitaire de luxe sur socle de marbre et rétroéclairage rubis.',   false),
   ('Plateau Technique & Scénographie',     'Studio',        '/hero-studio.jpg',       'Mise en scène studio avec éclairages bordeaux et caméras cinéma.',             false),
-  ('Laboratoire de Retouche Numérique',    'Studio',        '/about-photographer.jpg','Étalonnage colorimétrique haute fidélité en direct sur moniteur calibré.',     false),
-  ('Valse Nocturne & Féerie',              'Mariage',       '/wedding.jpg',           'Moments d''émotions partagés dans un cadre architectural majestueux.',         false),
-  ('Campagne Hivernal Haute Joaillerie',   'Mode',          '/fashion.jpg',           'Mise en lumière des reflets et des matières nobles.',                          false)
+  ('Reportage en Coulisses',    'Studio',        '/about-photographer.jpg','Notre équipe en action pour saisir chaque instant, sur le vif.',     false),
+  ('Valse Nocturne & Féerie',              'Mariage',       '/wedding-2.jpg',         'Complicité des mariés dans un jardin tropical, à la tombée du jour.',         false),
+  ('Campagne Hivernal Haute Joaillerie',   'Mode',          '/fashion-2.jpg',         'Mise en lumière des reflets et des matières nobles.',                          false)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO services (id, title, badge, image, description, advantages, price) VALUES
