@@ -1,5 +1,5 @@
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+// The API is served by this Next.js app (app/api/*); override only to use another server
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 // ─── Auth token helpers ───────────────────────────────────────────────────────
 
@@ -36,6 +36,7 @@ export function resolveImageUrl(src: string | undefined | null, fallback = "/wed
     return trimmed;
   }
   if (trimmed.startsWith("/uploads/")) {
+    // Empty origin when the API is served by this app: the path stays relative
     const backendOrigin = API_BASE_URL.replace(/\/api\/?$/, "");
     return `${backendOrigin}${trimmed}`;
   }

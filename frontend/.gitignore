@@ -1,3 +1,5 @@
 .vercel
 .env*
 !.env.example
+# Images uploaded from the admin in local development
+/public/uploads
