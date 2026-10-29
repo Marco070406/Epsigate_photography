@@ -72,14 +72,17 @@ const bestOfGallery = [
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [paused, setPaused] = useState(false);
 
-  // Auto slide every 6 seconds
+  // Next slide after 6 seconds; the delay restarts after a manual change
+  // and autoplay pauses while the visitor hovers or focuses the slider
   useEffect(() => {
-    const timer = setInterval(() => {
+    if (paused) return;
+    const timer = setTimeout(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 6000);
-    return () => clearInterval(timer);
-  }, []);
+    return () => clearTimeout(timer);
+  }, [currentSlide, paused]);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
@@ -96,17 +99,27 @@ export default function Home() {
   return (
     <>
       {/* ===== HERO SECTION WITH DYNAMIC SLIDER ===== */}
-      <section className="hero-slider-section" id="hero">
+      <section
+        className="hero-slider-section"
+        id="hero"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        onFocus={() => setPaused(true)}
+        onBlur={() => setPaused(false)}
+      >
         <div className="container">
           <div className="hero-slider-container">
             {/* Slide Content */}
             <div className="hero-slide-content animate-fade-in-up">
-              <p className="hero-subtitle">{slide.subtitle}</p>
-              <h1 className="hero-title">
-                {slide.titlePart1}
-                <span className="gradient-text">{slide.titleHighlight}</span>
-              </h1>
-              <p className="hero-description">{slide.description}</p>
+              {/* key: the text fades in again on every slide change */}
+              <div key={currentSlide} className="hero-slide-text" aria-live="polite">
+                <p className="hero-subtitle">{slide.subtitle}</p>
+                <h1 className="hero-title">
+                  {slide.titlePart1}
+                  <span className="gradient-text">{slide.titleHighlight}</span>
+                </h1>
+                <p className="hero-description">{slide.description}</p>
+              </div>
 
               <div className="hero-buttons">
                 <Link href="/contact" className="btn btn-primary" id="hero-cta-book">
@@ -139,6 +152,7 @@ export default function Home() {
                       onClick={() => setCurrentSlide(index)}
                       className={`slider-dot${currentSlide === index ? " active" : ""}`}
                       aria-label={`Aller à la diapositive ${index + 1}`}
+                      aria-current={currentSlide === index ? "true" : undefined}
                       type="button"
                     />
                   ))}
@@ -158,15 +172,20 @@ export default function Home() {
             {/* Slide Media */}
             <div className="hero-slider-media animate-fade-in-up animate-delay-1">
               <div className="hero-image-wrapper">
-                <Image
-                  src={slide.image}
-                  alt={slide.subtitle}
-                  width={800}
-                  height={600}
-                  priority
-                  style={{ width: "100%", height: "auto", display: "block" }}
-                />
-                <div className="hero-badge-overlay">
+                {/* All slides stay mounted and crossfade; the frame keeps a fixed ratio */}
+                {heroSlides.map((s, index) => (
+                  <Image
+                    key={s.image}
+                    src={s.image}
+                    alt={index === currentSlide ? s.subtitle : ""}
+                    aria-hidden={index !== currentSlide}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 45vw"
+                    priority={index === 0}
+                    className={`hero-slide-image${index === currentSlide ? " is-active" : ""}`}
+                  />
+                ))}
+                <div className="hero-badge-overlay" key={currentSlide}>
                   <span className="hero-badge-category">
                     {slide.badgeCategory}
                   </span>
@@ -193,7 +212,7 @@ export default function Home() {
 
             <div>
               <p className="page-header-subtitle">L’esprit Epsigate</p>
-              <h2 className="section-title" style={{ textAlign: "left" }}>
+              <h2 className="section-title section-title-left">
                 La passion de l’image d’exception
               </h2>
               <p style={{ color: "var(--text-secondary)", lineHeight: "1.8", marginBottom: "18px" }}>

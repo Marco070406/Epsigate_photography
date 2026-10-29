@@ -1,15 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Sun, Moon } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 
+const NAV_LINKS = [
+  { href: "/", label: "Accueil", id: "nav-accueil" },
+  { href: "/services", label: "Services", id: "nav-services" },
+  { href: "/portfolio", label: "Portfolio", id: "nav-portfolio" },
+  { href: "/a-propos", label: "À propos", id: "nav-a-propos" },
+  { href: "/contact", label: "Contact", id: "nav-contact" },
+];
+
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+
+  // Shadow under the header once the page is scrolled
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Escape closes the mobile menu
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMobileNavOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileNavOpen]);
 
   // Ne pas afficher la navbar publique sur l'espace d'administration
   if (pathname?.startsWith("/admin")) {
@@ -21,47 +46,26 @@ export default function Header() {
   const isActive = (href: string) => pathname === href;
 
   return (
-    <header className="header" id="header">
+    <header className={`header${scrolled ? " header-scrolled" : ""}`} id="header">
       <div className="container header-inner">
         <Link href="/" className="logo" id="logo">
           Epsigate
         </Link>
 
-        <nav className="nav" id="main-nav">
-          <Link
-            href="/"
-            className={`nav-link${isActive("/") ? " nav-link-active" : ""}`}
-            id="nav-accueil"
-          >
-            Accueil
-          </Link>
-          <Link
-            href="/services"
-            className={`nav-link${isActive("/services") ? " nav-link-active" : ""}`}
-            id="nav-services"
-          >
-            Services
-          </Link>
-          <Link
-            href="/portfolio"
-            className={`nav-link${isActive("/portfolio") ? " nav-link-active" : ""}`}
-            id="nav-portfolio"
-          >
-            Portfolio
-          </Link>
-          <Link
-            href="/a-propos"
-            className={`nav-link${isActive("/a-propos") ? " nav-link-active" : ""}`}
-            id="nav-a-propos"
-          >
-            À propos
-          </Link>
-          <Link
-            href="/contact"
-            className={`nav-link${isActive("/contact") ? " nav-link-active" : ""}`}
-            id="nav-contact"
-          >
-            Contact
+        <nav className="nav" id="main-nav" aria-label="Navigation principale">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`nav-link${isActive(link.href) ? " nav-link-active" : ""}`}
+              aria-current={isActive(link.href) ? "page" : undefined}
+              id={link.id}
+            >
+              {link.label}
+            </Link>
+          ))}
+          <Link href="/contact" className="btn btn-primary header-cta" id="header-cta">
+            Devis gratuit
           </Link>
           <button
             className="theme-toggle"
@@ -77,9 +81,11 @@ export default function Header() {
             )}
           </button>
           <button
-            className="menu-toggle"
+            className={`menu-toggle${mobileNavOpen ? " menu-toggle-open" : ""}`}
             onClick={() => setMobileNavOpen(!mobileNavOpen)}
-            aria-label="Menu"
+            aria-label={mobileNavOpen ? "Fermer le menu" : "Ouvrir le menu"}
+            aria-expanded={mobileNavOpen}
+            aria-controls="mobile-nav"
             id="menu-toggle"
             type="button"
           >
@@ -94,21 +100,21 @@ export default function Header() {
       <nav
         className={`nav-mobile${mobileNavOpen ? " nav-mobile-open" : ""}`}
         id="mobile-nav"
+        aria-label="Navigation mobile"
       >
-        <Link href="/" className="nav-link" onClick={closeMobileNav}>
-          Accueil
-        </Link>
-        <Link href="/services" className="nav-link" onClick={closeMobileNav}>
-          Services
-        </Link>
-        <Link href="/portfolio" className="nav-link" onClick={closeMobileNav}>
-          Portfolio
-        </Link>
-        <Link href="/a-propos" className="nav-link" onClick={closeMobileNav}>
-          À propos
-        </Link>
-        <Link href="/contact" className="nav-link" onClick={closeMobileNav}>
-          Contact
+        {NAV_LINKS.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className={`nav-link${isActive(link.href) ? " nav-link-active" : ""}`}
+            aria-current={isActive(link.href) ? "page" : undefined}
+            onClick={closeMobileNav}
+          >
+            {link.label}
+          </Link>
+        ))}
+        <Link href="/contact" className="btn btn-primary nav-mobile-cta" onClick={closeMobileNav}>
+          Demander un devis gratuit
         </Link>
       </nav>
     </header>

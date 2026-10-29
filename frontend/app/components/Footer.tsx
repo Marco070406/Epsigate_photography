@@ -48,106 +48,118 @@ export default function Footer() {
   }
 
   return (
-    <footer className="footer" id="footer">
-      <div className="container">
-        <div className="footer-top">
-          <div>
-            <p className="footer-logo">Epsigate Photography</p>
-            <p className="footer-tagline">
-              Studio de photographie professionnelle & artistique à Lomé, Togo.
-              Excellence visuelle, maîtrise de la lumière & créativité.
-            </p>
-          </div>
+    <>
+      {/* Floating WhatsApp shortcut, on every public page */}
+      <a
+        href={`https://wa.me/${contact.whatsapp}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="whatsapp-float"
+        aria-label="Écrire à Epsigate sur WhatsApp"
+      >
+        <WhatsAppIcon size={26} />
+      </a>
+      <footer className="footer" id="footer">
+        <div className="container">
+          <div className="footer-top">
+            <div>
+              <p className="footer-logo">Epsigate Photography</p>
+              <p className="footer-tagline">
+                Studio de photographie professionnelle & artistique à Lomé, Togo.
+                Excellence visuelle, maîtrise de la lumière & créativité.
+              </p>
+            </div>
 
-          <div className="footer-social-section">
-            <p className="footer-section-title">Suivez-nous</p>
-            <div className="footer-socials">
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="social-link"
-                aria-label="Instagram Epsigate"
-              >
-                <InstagramIcon size={18} />
-              </a>
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="social-link"
-                aria-label="Facebook Epsigate"
-              >
-                <FacebookIcon size={18} />
-              </a>
-              <a
-                href="https://tiktok.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="social-link"
-                aria-label="TikTok Epsigate"
-              >
-                <TikTokIcon size={18} />
-              </a>
-              <a
-                href={`https://wa.me/${contact.whatsapp}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="social-link"
-                aria-label="WhatsApp Epsigate"
-              >
-                <WhatsAppIcon size={18} />
-              </a>
+            <div className="footer-social-section">
+              <p className="footer-section-title">Suivez-nous</p>
+              <div className="footer-socials">
+                <a
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-link"
+                  aria-label="Instagram Epsigate"
+                >
+                  <InstagramIcon size={18} />
+                </a>
+                <a
+                  href="https://facebook.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-link"
+                  aria-label="Facebook Epsigate"
+                >
+                  <FacebookIcon size={18} />
+                </a>
+                <a
+                  href="https://tiktok.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-link"
+                  aria-label="TikTok Epsigate"
+                >
+                  <TikTokIcon size={18} />
+                </a>
+                <a
+                  href={`https://wa.me/${contact.whatsapp}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-link"
+                  aria-label="WhatsApp Epsigate"
+                >
+                  <WhatsAppIcon size={18} />
+                </a>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="footer-nav-grid">
-          <div className="footer-links">
-            <Link href="/" className="footer-link">
-              Accueil
-            </Link>
-            <Link href="/services" className="footer-link">
-              Services
-            </Link>
-            <Link href="/portfolio" className="footer-link">
-              Portfolio
-            </Link>
-            <Link href="/a-propos" className="footer-link">
-              À propos
-            </Link>
-            <Link href="/contact" className="footer-link">
-              Contact & Devis
-            </Link>
+          <div className="footer-nav-grid">
+            <div className="footer-links">
+              <Link href="/" className="footer-link">
+                Accueil
+              </Link>
+              <Link href="/services" className="footer-link">
+                Services
+              </Link>
+              <Link href="/portfolio" className="footer-link">
+                Portfolio
+              </Link>
+              <Link href="/a-propos" className="footer-link">
+                À propos
+              </Link>
+              <Link href="/contact" className="footer-link">
+                Contact & Devis
+              </Link>
+            </div>
+
+            <div className="footer-contact-mini">
+              <span>
+                <MapPin size={14} style={{ display: "inline", marginRight: "4px" }} />
+                {contact.address}
+              </span>
+              <span>
+                <Phone size={14} style={{ display: "inline", marginRight: "4px" }} />
+                {contact.phone}
+              </span>
+              <span>
+                <Mail size={14} style={{ display: "inline", marginRight: "4px" }} />
+                {contact.email}
+              </span>
+            </div>
           </div>
 
-          <div className="footer-contact-mini">
-            <span>
-              <MapPin size={14} style={{ display: "inline", marginRight: "4px" }} />
-              {contact.address}
-            </span>
-            <span>
-              <Phone size={14} style={{ display: "inline", marginRight: "4px" }} />
-              {contact.phone}
-            </span>
-            <span>
-              <Mail size={14} style={{ display: "inline", marginRight: "4px" }} />
-              {contact.email}
-            </span>
+          <div className="footer-bottom">
+            <p className="footer-copy" suppressHydrationWarning>
+              © {new Date().getFullYear()} Epsigate Photography - Lomé, Togo. Tous droits
+              réservés. Studio de photographie d’art & commerciale.
+            </p>
+            <Link href="/admin" className="footer-admin-link" prefetch={false}>
+              <Lock size={12} aria-hidden="true" />
+              Espace administration
+            </Link>
           </div>
         </div>
-
-        <div className="footer-bottom">
-          <p className="footer-copy" suppressHydrationWarning>
-            © {new Date().getFullYear()} Epsigate Photography - Lomé, Togo. Tous droits
-            réservés. Studio de photographie d’art & commerciale.
-          </p>
-          <Link href="/admin" className="footer-admin-link" prefetch={false}>
-            <Lock size={12} aria-hidden="true" />
-            Espace administration
-          </Link>
-        </div>
-      </div>
-    </footer>
+      </footer>
+    </>
   );
 }

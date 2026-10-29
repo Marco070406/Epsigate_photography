@@ -93,7 +93,7 @@ export default function AboutPage() {
         <div className="about-hero-grid">
           <div>
             <p className="page-header-subtitle">Genèse du Studio</p>
-            <h2 className="section-title" style={{ textAlign: "left" }}>
+            <h2 className="section-title section-title-left">
               Capturer la lumière, révéler l’intemporel
             </h2>
             <p style={{ color: "var(--text-secondary)", lineHeight: "1.8", marginBottom: "16px" }}>
