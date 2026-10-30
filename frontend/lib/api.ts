@@ -101,10 +101,29 @@ function canvasToJpeg(canvas: HTMLCanvasElement, quality: number): Promise<Blob 
   return new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
 }
 
+// Formats the server stores as-is; anything else the browser can read is converted to JPEG
+const SERVER_FORMATS = ["image/jpeg", "image/png", "image/webp", "image/avif", "image/gif"];
+
+function withJpegName(file: File): string {
+  return file.name.replace(/\.[^.]+$/, "") + ".jpg";
+}
+
+/** iPhone photos: Chrome, Edge and Firefox cannot read HEIC, Safari can. */
+function isHeicFile(file: File): boolean {
+  return /^image\/hei[cf]/i.test(file.type) || /\.hei[cf]$/i.test(file.name);
+}
+
+async function heicToJpeg(file: File): Promise<File> {
+  // Loaded only when needed (~3 MB decoder); the "csp" build runs without eval
+  const { heicTo } = await import("heic-to/csp");
+  const jpeg = await heicTo({ blob: file, type: "image/jpeg", quality: 0.9 });
+  return new File([jpeg], withJpegName(file), { type: "image/jpeg" });
+}
+
 /**
- * Resizes and recompresses a photo that is too large or too heavy (camera and
- * phone photos are often 5–15 MB). Small files, GIFs and images the browser
- * cannot decode are sent unchanged.
+ * Converts HEIC and other unusual formats to JPEG, and resizes/recompresses a
+ * photo that is too large or too heavy (camera and phone photos are often
+ * 5–15 MB). Small JPG/PNG/WebP/AVIF files and GIFs are sent unchanged.
  */
 export async function prepareImageForUpload(file: File): Promise<File> {
   if (file.type === "image/gif" || typeof createImageBitmap !== "function") return file;
@@ -114,11 +133,19 @@ export async function prepareImageForUpload(file: File): Promise<File> {
     // Applies the EXIF orientation, so portrait phone photos stay upright
     bitmap = await createImageBitmap(file);
   } catch {
-    return file;
+    if (!isHeicFile(file)) return file; // The server answers with a clear message
+    try {
+      file = await heicToJpeg(file);
+      bitmap = await createImageBitmap(file);
+    } catch (err) {
+      console.error("HEIC conversion failed:", err);
+      return file;
+    }
   }
 
+  const needsConversion = !SERVER_FORMATS.includes(file.type.toLowerCase());
   const scale = Math.min(1, MAX_DIMENSION / Math.max(bitmap.width, bitmap.height));
-  if (scale === 1 && file.size <= MAX_UPLOAD_BYTES) {
+  if (scale === 1 && file.size <= MAX_UPLOAD_BYTES && !needsConversion) {
     bitmap.close();
     return file;
   }
@@ -140,8 +167,7 @@ export async function prepareImageForUpload(file: File): Promise<File> {
   for (const quality of [0.9, 0.82, 0.72]) {
     const blob = await canvasToJpeg(canvas, quality);
     if (blob && blob.size <= MAX_UPLOAD_BYTES) {
-      const name = file.name.replace(/\.[^.]+$/, "") + ".jpg";
-      return new File([blob], name, { type: "image/jpeg" });
+      return new File([blob], withJpegName(file), { type: "image/jpeg" });
     }
   }
   return file; // Still too heavy: the server answers with a clear message

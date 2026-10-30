@@ -1996,7 +1996,7 @@ export default function AdminPage() {
                   <input
                     type="file"
                     id="service-upload-input"
-                    accept="image/*"
+                    accept="image/*,.heic,.heif"
                     style={{ display: "none" }}
                     onChange={handleServiceFileUpload}
                   />
@@ -2185,7 +2185,7 @@ export default function AdminPage() {
                   <input
                     type="file"
                     id="portfolio-upload-input"
-                    accept="image/*"
+                    accept="image/*,.heic,.heif"
                     style={{ display: "none" }}
                     onChange={handlePhotoFileUpload}
                   />
@@ -2367,7 +2367,7 @@ export default function AdminPage() {
                   <input
                     type="file"
                     id="team-upload-input"
-                    accept="image/*"
+                    accept="image/*,.heic,.heif"
                     style={{ display: "none" }}
                     onChange={handleTeamFileUpload}
                   />

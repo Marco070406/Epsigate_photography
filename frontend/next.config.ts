@@ -11,6 +11,8 @@ const csp = [
   "img-src 'self' data: blob: https:",
   "font-src 'self'",
   "connect-src 'self'",
+  // The HEIC converter (heic-to) decodes in a worker created from a blob: URL
+  "worker-src 'self' blob:",
   "frame-src https://www.google.com https://maps.google.com",
   "frame-ancestors 'none'",
   "object-src 'none'",
