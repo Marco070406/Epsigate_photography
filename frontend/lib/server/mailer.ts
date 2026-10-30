@@ -76,6 +76,11 @@ function esc(value: string | undefined | null): string {
     .replace(/'/g, "&#39;");
 }
 
+/** "2026-11-14 à 15:30", "2026-11-14" or "à 15:30"; empty when neither was given. */
+function when(msg: MessageItem): string {
+  return [msg.date, msg.time && `à ${msg.time}`].filter(Boolean).join(" ");
+}
+
 // ─── Shared layout wrapper ────────────────────────────────────────────────────
 
 function layout(title: string, body: string): string {
@@ -132,7 +137,7 @@ function confirmationHtml(msg: MessageItem): string {
     <table class="field-table">
       <tr><td>Nature de la demande</td><td>${esc(labelOf(PURPOSE_LABELS, msg.purpose))}</td></tr>
       <tr><td>Prestation souhaitée</td><td>${esc(labelOf(SERVICE_LABELS, msg.service))}</td></tr>
-      ${msg.date ? `<tr><td>Date envisagée</td><td>${esc(msg.date)}</td></tr>` : ""}
+      ${when(msg) ? `<tr><td>Date envisagée</td><td>${esc(when(msg))}</td></tr>` : ""}
       <tr><td>Téléphone renseigné</td><td>${esc(msg.phone)}</td></tr>
     </table>
 
@@ -154,7 +159,7 @@ Notre équipe vous recontactera sous 24 à 48 heures.
 Récapitulatif :
 - Nature     : ${labelOf(PURPOSE_LABELS, msg.purpose)}
 - Prestation : ${labelOf(SERVICE_LABELS, msg.service)}
-${msg.date ? `- Date       : ${msg.date}\n` : ""}- Téléphone  : ${msg.phone}
+${when(msg) ? `- Date       : ${when(msg)}\n` : ""}- Téléphone  : ${msg.phone}
 
 Votre message :
 ${msg.message}
@@ -177,7 +182,7 @@ function notificationHtml(msg: MessageItem, adminUrl: string): string {
       <tr><td>Téléphone</td><td>${esc(msg.phone)}</td></tr>
       <tr><td>Nature</td><td>${esc(labelOf(PURPOSE_LABELS, msg.purpose))}</td></tr>
       <tr><td>Prestation</td><td>${esc(labelOf(SERVICE_LABELS, msg.service))}</td></tr>
-      ${msg.date ? `<tr><td>Date souhaitée</td><td>${esc(msg.date)}</td></tr>` : ""}
+      ${when(msg) ? `<tr><td>Date souhaitée</td><td>${esc(when(msg))}</td></tr>` : ""}
       <tr><td>Reçu le</td><td>${new Date(msg.createdAt).toLocaleString("fr-FR", { timeZone: "Africa/Lome" })}</td></tr>
     </table>
 
@@ -197,7 +202,7 @@ Email    : ${msg.email}
 Téléphone: ${msg.phone}
 Nature   : ${labelOf(PURPOSE_LABELS, msg.purpose)}
 Prestation: ${labelOf(SERVICE_LABELS, msg.service)}
-${msg.date ? `Date     : ${msg.date}\n` : ""}
+${when(msg) ? `Date     : ${when(msg)}\n` : ""}
 Message :
 ${msg.message}`;
 }

@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS messages (
   purpose     VARCHAR(50)  DEFAULT 'devis',
   service     VARCHAR(50)  DEFAULT 'autre',
   date        DATE,
+  event_time  VARCHAR(5),
   message     TEXT         NOT NULL,
   status      VARCHAR(20)  DEFAULT 'nouveau' CHECK (status IN ('nouveau','traité','archivé')),
   created_at  TIMESTAMPTZ  DEFAULT NOW()
@@ -100,6 +101,10 @@ CREATE TABLE IF NOT EXISTS rate_limits (
   count     INTEGER      NOT NULL,
   reset_at  TIMESTAMPTZ  NOT NULL
 );
+
+-- Columns added after the first release: existing databases get them here.
+-- migrate.ts checks for the newest one (messages.event_time).
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS event_time VARCHAR(5);
 `;
 
 // Données de départ : insérées une seule fois, sur une base vide

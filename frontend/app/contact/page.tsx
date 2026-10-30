@@ -46,6 +46,7 @@ function ContactPageInner() {
     purpose: "devis",
     service: serviceParam,
     date: "",
+    time: "",
     message: "",
     honeypot: "",
   });
@@ -361,20 +362,36 @@ function ContactPageInner() {
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="date" className="form-label">
-                    Date envisagée (optionnel)
-                  </label>
-                  <input
-                    type="date"
-                    id="date"
-                    className="form-input"
-                    min={new Date().toISOString().split("T")[0]}
-                    value={formData.date}
-                    onChange={(e) =>
-                      setFormData({ ...formData, date: e.target.value })
-                    }
-                  />
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="date" className="form-label">
+                      Date envisagée (optionnel)
+                    </label>
+                    <input
+                      type="date"
+                      id="date"
+                      className="form-input"
+                      min={new Date().toISOString().split("T")[0]}
+                      value={formData.date}
+                      onChange={(e) =>
+                        setFormData({ ...formData, date: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="time" className="form-label">
+                      Heure envisagée (optionnel)
+                    </label>
+                    <input
+                      type="time"
+                      id="time"
+                      className="form-input"
+                      value={formData.time}
+                      onChange={(e) =>
+                        setFormData({ ...formData, time: e.target.value })
+                      }
+                    />
+                  </div>
                 </div>
 
                 <div className="form-group">

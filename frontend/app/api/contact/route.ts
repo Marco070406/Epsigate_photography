@@ -9,6 +9,7 @@ import { sendContactConfirmation, sendAdminNotification } from "@/lib/server/mai
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^[0-9+()./\s-]{6,30}$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 // Max lengths aligned with the database columns
 const MAX = { name: 255, email: 255, purpose: 50, service: 50, message: 5000 };
@@ -16,7 +17,7 @@ const MAX = { name: 255, email: 255, purpose: 50, service: 50, message: 5000 };
 export const POST = api(async (req: Request) => {
   const body = await readJson(req);
   if (!body) return jsonError("Requête invalide.", 400);
-  const { name, email, phone, purpose, service, date, message, honeypot } = body;
+  const { name, email, phone, purpose, service, date, time, message, honeypot } = body;
 
   if (honeypot) {
     return Response.json({ success: true, message: "Demande reçue" });
@@ -48,6 +49,8 @@ export const POST = api(async (req: Request) => {
   }
 
   const trimmedDate = date ? String(date).trim() : "";
+  // Browsers send "HH:MM", or "HH:MM:SS" when seconds are shown
+  const trimmedTime = time ? String(time).trim().slice(0, 5) : "";
 
   const saved = await addMessage({
     name:    String(name).trim(),
@@ -57,6 +60,7 @@ export const POST = api(async (req: Request) => {
     service: String(service || "autre").trim().slice(0, MAX.service),
     // Invalid dates are ignored rather than crashing the DATE column insert
     date:    DATE_RE.test(trimmedDate) && !isNaN(Date.parse(trimmedDate)) ? trimmedDate : undefined,
+    time:    TIME_RE.test(trimmedTime) ? trimmedTime : undefined,
     message: String(message).trim(),
   });
 

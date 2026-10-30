@@ -29,6 +29,8 @@ export interface MessageItem {
   purpose: string;
   service: string;
   date?: string;
+  /** "HH:MM" */
+  time?: string;
   message: string;
   status: MessageStatus;
   createdAt: string;

@@ -42,6 +42,8 @@ export interface MessageItem {
   purpose: string;
   service: string;
   date?: string;
+  /** "HH:MM" */
+  time?: string;
   message: string;
   status: MessageStatus;
   createdAt: string;
@@ -143,6 +145,7 @@ function mapMessage(row: any): MessageItem {
     purpose: row.purpose,
     service: row.service,
     date: row.date ? String(row.date).split("T")[0] : undefined,
+    time: row.event_time || undefined,
     message: row.message,
     status: row.status as MessageStatus,
     createdAt: row.created_at,
@@ -316,9 +319,9 @@ export async function addMessage(
 ): Promise<MessageItem> {
   const id = newId("msg");
   const rows = await query(
-    `INSERT INTO messages (id, name, email, phone, purpose, service, date, message)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
-    [id, data.name, data.email, data.phone, data.purpose, data.service, data.date ?? null, data.message]
+    `INSERT INTO messages (id, name, email, phone, purpose, service, date, event_time, message)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+    [id, data.name, data.email, data.phone, data.purpose, data.service, data.date ?? null, data.time ?? null, data.message]
   );
   return mapMessage(rows[0]);
 }

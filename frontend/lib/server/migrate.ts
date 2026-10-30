@@ -13,11 +13,17 @@ let ready: Promise<void> | null = null;
 async function migrate(): Promise<void> {
   const client = await pool.connect();
   try {
-    // Fast path: rate_limits is the last table of SCHEMA_SQL, created in the same
-    // transaction as the seed, so its presence means the database is fully set up
-    // (one query per cold start). Add new tables before it, and move this check
-    // to the newest table, so existing databases get them too.
-    const check = await client.query("SELECT to_regclass('public.rate_limits') IS NOT NULL AS ready");
+    // Fast path: rate_limits is the last table of SCHEMA_SQL and messages.event_time
+    // its newest column, created in the same transaction as the seed, so their
+    // presence means the database is fully set up (one query per cold start).
+    // When adding a table or column, move this check to it so existing databases
+    // get it too.
+    const check = await client.query(
+      `SELECT to_regclass('public.rate_limits') IS NOT NULL AND EXISTS (
+         SELECT 1 FROM information_schema.columns
+         WHERE table_schema = 'public' AND table_name = 'messages' AND column_name = 'event_time'
+       ) AS ready`
+    );
     if (check.rows[0].ready) return;
 
     // Transaction-level lock: works through Neon's connection pooler

@@ -1759,7 +1759,9 @@ export default function AdminPage() {
                 <div>
                   <span style={{ fontSize: "0.78rem", color: "#a39ba2" }}>Date prévue</span>
                   <div style={{ color: "#ffffff" }}>
-                    {selectedMessage.date || "Non spécifiée"}
+                    {[selectedMessage.date, selectedMessage.time && `à ${selectedMessage.time}`]
+                      .filter(Boolean)
+                      .join(" ") || "Non spécifiée"}
                   </div>
                 </div>
               </div>
