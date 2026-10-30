@@ -104,13 +104,26 @@ function canvasToJpeg(canvas: HTMLCanvasElement, quality: number): Promise<Blob 
 // Formats the server stores as-is; anything else the browser can read is converted to JPEG
 const SERVER_FORMATS = ["image/jpeg", "image/png", "image/webp", "image/avif", "image/gif"];
 
+/** A file the browser cannot prepare: its message is shown to the admin as-is. */
+class UploadError extends Error {}
+
 function withJpegName(file: File): string {
   return file.name.replace(/\.[^.]+$/, "") + ".jpg";
 }
 
-/** iPhone photos: Chrome, Edge and Firefox cannot read HEIC, Safari can. */
-function isHeicFile(file: File): boolean {
-  return /^image\/hei[cf]/i.test(file.type) || /\.hei[cf]$/i.test(file.name);
+function extensionOf(file: File): string {
+  return /\.([a-z0-9]+)$/i.exec(file.name)?.[1].toUpperCase() || "inconnu";
+}
+
+/**
+ * iPhone photos: Chrome, Edge and Firefox cannot read HEIC, Safari can. Checked
+ * on the content too ("ftyp" box brand), as the name and type are not reliable.
+ */
+async function isHeicFile(file: File): Promise<boolean> {
+  if (/^image\/hei[cf]/i.test(file.type) || /\.hei[cf]$/i.test(file.name)) return true;
+  const head = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+  const ascii = String.fromCharCode(...head);
+  return ascii.slice(4, 8) === "ftyp" && /^(hei[cmsx]|hev[cmsx]|mif1|msf1)$/.test(ascii.slice(8, 12));
 }
 
 async function heicToJpeg(file: File): Promise<File> {
@@ -133,13 +146,20 @@ export async function prepareImageForUpload(file: File): Promise<File> {
     // Applies the EXIF orientation, so portrait phone photos stay upright
     bitmap = await createImageBitmap(file);
   } catch {
-    if (!isHeicFile(file)) return file; // The server answers with a clear message
+    if (!(await isHeicFile(file))) {
+      throw new UploadError(
+        `Ce fichier (format ${extensionOf(file)}) n'est pas une image lisible. Choisissez une photo JPG, PNG, WebP ou HEIC.`
+      );
+    }
     try {
       file = await heicToJpeg(file);
       bitmap = await createImageBitmap(file);
     } catch (err) {
       console.error("HEIC conversion failed:", err);
-      return file;
+      throw new UploadError(
+        `Impossible de convertir cette photo HEIC (${String(err).slice(0, 120)}). ` +
+          "Exportez-la en JPG ou, sur iPhone, choisissez Réglages > Appareil photo > Formats > « Le plus compatible »."
+      );
     }
   }
 
@@ -176,9 +196,16 @@ export async function prepareImageForUpload(file: File): Promise<File> {
 export async function uploadImage(
   file: File
 ): Promise<{ ok: boolean; url?: string; error?: string }> {
+  let prepared: File;
+  try {
+    prepared = await prepareImageForUpload(file);
+  } catch (err) {
+    return { ok: false, error: err instanceof UploadError ? err.message : "Impossible de lire cette image." };
+  }
+
   try {
     const formData = new FormData();
-    formData.append("image", await prepareImageForUpload(file));
+    formData.append("image", prepared);
 
     const res = await fetch(`${API_BASE_URL}/upload`, {
       method: "POST",
