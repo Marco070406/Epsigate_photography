@@ -6,17 +6,18 @@
  */
 
 /** Bump when CONTENT_SQL changes: migrate.ts re-runs the migration once per version. */
-export const CONTENT_VERSION = "content-2026-11-instagram-maps";
+export const CONTENT_VERSION = "content-2026-11-instagram-maps-2";
 
 /** Real photos from the studio's Instagram and Google Maps listing (files in /public). */
 export const PORTFOLIO_ITEMS = [
-  { src: "/fashion.jpg", oldTitle: "Collection Soie & Pourpre", category: "Mode", title: "Veste moutarde", description: "Portrait mode en studio, veste jaune moutarde sur fond noir.", featured: true },
-  { src: "/portrait.jpg", oldTitle: "Portrait Dirigeante d'Entreprise", category: "Portrait", title: "Portrait fleuri", description: "Maquillage vert vif et couronne de fleurs sur fond émeraude.", featured: true },
-  { src: "/event.jpg", oldTitle: "Gala Prestige Lomé 2024", category: "Événementiel", title: "Gala des Entrepreneurs", description: "Prise de parole lors de la grande rencontre annuelle des entrepreneurs à Lomé.", featured: false },
-  { src: "/commercial.jpg", oldTitle: "Flacon Aurora — Eau de Parfum", category: "Commercial", title: "Artisanat togolais", description: "Poteries et objets d'art mis en valeur pour une présentation produit.", featured: false },
-  { src: "/hero-studio.jpg", oldTitle: "Plateau Technique & Scénographie", category: "Studio", title: "Drapés colorés en studio", description: "Mise en scène sur drapés rouge, jaune et bleu, en lumière douce.", featured: false },
-  { src: "/about-photographer.jpg", oldTitle: "Reportage en Coulisses", category: "Studio", title: "Dans les coulisses", description: "L'équipe Epsigate en reportage, appareil en main, au Lac Easter Show.", featured: false },
-  { src: "/fashion-2.jpg", oldTitle: "Campagne Hivernal Haute Joaillerie", category: "Mode", title: "Costume orange", description: "Look audacieux sur fond rose, lunettes et veste croisée.", featured: false },
+  { src: "/fashion.jpg", oldTitles: ["Collection Soie & Pourpre"], category: "Mode", title: "Veste moutarde", description: "Portrait mode en studio, veste jaune moutarde sur fond noir.", featured: true },
+  { src: "/portrait.jpg", oldTitles: ["Portrait Dirigeante d'Entreprise"], category: "Portrait", title: "Portrait fleuri", description: "Maquillage vert vif et couronne de fleurs sur fond émeraude.", featured: true },
+  { src: "/event.jpg", oldTitles: ["Gala Prestige Lomé 2024"], category: "Événementiel", title: "Gala des Entrepreneurs", description: "Prise de parole lors de la grande rencontre annuelle des entrepreneurs à Lomé.", featured: false },
+  { src: "/commercial.jpg", oldTitles: ["Flacon Aurora — Eau de Parfum", "Flacon Aurora - Eau de Parfum"], category: "Commercial", title: "Artisanat togolais", description: "Poteries et objets d'art mis en valeur pour une présentation produit.", featured: false },
+  { src: "/hero-studio.jpg", oldTitles: ["Plateau Technique & Scénographie"], category: "Studio", title: "Drapés colorés en studio", description: "Mise en scène sur drapés rouge, jaune et bleu, en lumière douce.", featured: false },
+  { src: "/about-photographer.jpg", oldTitles: ["Reportage en Coulisses", "Laboratoire de Retouche Numérique"], category: "Studio", title: "Dans les coulisses", description: "L'équipe Epsigate en reportage, appareil en main, au Lac Easter Show.", featured: false },
+  { src: "/fashion-2.jpg", oldSrcs: ["/fashion.jpg"], oldTitles: ["Campagne Hivernal Haute Joaillerie"], category: "Mode", title: "Costume orange", description: "Look audacieux sur fond rose, lunettes et veste croisée.", featured: false },
+  { src: "/wedding-2.jpg", oldSrcs: ["/wedding.jpg"], oldTitles: ["Valse Nocturne & Féerie"], category: "Mariage", title: "Valse Nocturne & Féerie", description: "Complicité des mariés dans un jardin tropical, à la tombée du jour.", featured: false },
   { src: "/portrait-wax.jpg", category: "Portrait", title: "Sourire en wax", description: "Portrait studio en tenue wax sur fond turquoise.", featured: true },
   { src: "/beaute-noir-blanc.jpg", category: "Portrait", title: "Beauté en noir et blanc", description: "Gros plan, bijoux argentés et contraste profond.", featured: false },
   { src: "/portrait-noir-blanc.jpg", category: "Portrait", title: "Regard en noir et blanc", description: "Portrait intimiste, lumière douce et grain fin.", featured: false },
@@ -37,10 +38,14 @@ const SEED_ADDRESS = "Boulevard du 13 Janvier, Quartier Administratif, Lomé, To
 const sql = (value: string | boolean): string =>
   typeof value === "boolean" ? String(value) : `'${value.replace(/'/g, "''")}'`;
 
+const sqlList = (values: readonly string[]): string => values.map(sql).join(", ");
+
 function portfolioStatement(item: (typeof PORTFOLIO_ITEMS)[number]): string {
-  if ("oldTitle" in item) {
-    return `UPDATE portfolio SET title = ${sql(item.title)}, description = ${sql(item.description)}
-  WHERE src = ${sql(item.src)} AND title IN (${sql(item.oldTitle)}, ${sql(item.oldTitle.replace("—", "-"))});`;
+  // Seed rows: matched on their original image and title (older databases had other images)
+  if ("oldTitles" in item) {
+    const srcs = [item.src, ...("oldSrcs" in item ? item.oldSrcs : [])];
+    return `UPDATE portfolio SET src = ${sql(item.src)}, title = ${sql(item.title)}, description = ${sql(item.description)}
+  WHERE src IN (${sqlList(srcs)}) AND title IN (${sqlList(item.oldTitles)});`;
   }
   return `INSERT INTO portfolio (title, category, src, description, featured)
   SELECT ${sql(item.title)}, ${sql(item.category)}, ${sql(item.src)}, ${sql(item.description)}, ${sql(item.featured)}
