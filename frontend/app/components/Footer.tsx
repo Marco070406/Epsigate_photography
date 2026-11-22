@@ -12,8 +12,8 @@ import {
 } from "./Icons";
 import { API_BASE_URL } from "@/lib/api";
 
-const DEFAULT_ADDRESS = "Boulevard du 13 Janvier, Lomé, Togo";
-const DEFAULT_PHONE = "+228 90 00 00 00";
+const DEFAULT_ADDRESS = "Djidjolé, à côté de l'école des sourds, Lomé, Togo";
+const DEFAULT_PHONE = "+228 90 78 29 22";
 const DEFAULT_EMAIL = "contact@epsigate-photography.com";
 const DEFAULT_WHATSAPP = "+22890000000";
 

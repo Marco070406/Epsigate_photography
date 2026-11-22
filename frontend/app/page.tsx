@@ -12,7 +12,9 @@ import {
   Sparkles,
   Camera,
   Layers,
+  Star,
 } from "lucide-react";
+import { InstagramIcon } from "./components/Icons";
 
 const heroSlides = [
   {
@@ -36,39 +38,63 @@ const heroSlides = [
     badgeLabel: "Campagnes & Lookbooks de marque",
   },
   {
-    subtitle: "Célébrations & Moments Inoubliables",
-    titlePart1: "L'émotion pure de vos ",
-    titleHighlight: "mariages",
+    subtitle: "Portraits en studio - Lomé, Togo",
+    titlePart1: "Votre personnalité, en pleine ",
+    titleHighlight: "lumière",
     description:
-      "Un regard discret et cinématographique pour immortaliser les plus précieux instants de votre vie au Togo, en Afrique de l'Ouest et à l'international.",
-    image: "/wedding.jpg",
-    badgeCategory: "Mariage & Événements",
-    badgeLabel: "Reportages d'exception au Togo",
+      "Couleurs, wax, noir et blanc : nous révélons votre style avec une mise en lumière pensée pour vous, au studio de Djidjolé ou sur le lieu de votre choix.",
+    image: "/portrait-wax.jpg",
+    badgeCategory: "Portrait & Beauté",
+    badgeLabel: "Séances en studio sur rendez-vous",
+  },
+  {
+    subtitle: "Événements, galas & culture",
+    titlePart1: "Les moments forts de vos ",
+    titleHighlight: "événements",
+    description:
+      "Galas, concerts, défilés et célébrations : un regard discret pour immortaliser chaque instant au Togo, en Afrique de l'Ouest et à l'international.",
+    image: "/togo-independance.jpg",
+    badgeCategory: "Événementiel",
+    badgeLabel: "Reportages au Togo et à l'international",
   },
 ];
 
 const bestOfGallery = [
   {
-    src: "/wedding.jpg",
-    title: "Célébration Nuptiale Prestige",
-    category: "Mariage",
-  },
-  {
-    src: "/fashion.jpg",
-    title: "Éditorial Soie & Velours",
-    category: "Mode",
-  },
-  {
     src: "/portrait.jpg",
-    title: "Portrait Dirigeante",
+    title: "Portrait fleuri",
     category: "Portrait",
   },
   {
-    src: "/commercial.jpg",
-    title: "Élixir Aurora",
-    category: "Commercial",
+    src: "/fashion-2.jpg",
+    title: "Élégance orange",
+    category: "Mode",
+  },
+  {
+    src: "/beaute-noir-blanc.jpg",
+    title: "Beauté en noir et blanc",
+    category: "Beauté",
+  },
+  {
+    src: "/concert-chorale.jpg",
+    title: "Concert annuel de la chorale",
+    category: "Événementiel",
   },
 ];
+
+// Recent Instagram posts shown on the home page; each one links to the account
+const INSTAGRAM_URL = "https://www.instagram.com/epsigate_photography";
+const instagramPosts = [
+  { src: "/togo-independance.jpg", alt: "Portrait au drapeau du Togo pour la fête de l'indépendance" },
+  { src: "/portrait-wax.jpg", alt: "Portrait studio en tenue wax sur fond turquoise" },
+  { src: "/event.jpg", alt: "Intervenante au Gala des Entrepreneurs à Lomé" },
+  { src: "/fimo-haute-couture.jpg", alt: "Tenue haute couture au FIMO 228" },
+  { src: "/defile-mode.jpg", alt: "Défilé de mode, costume brodé" },
+  { src: "/commercial.jpg", alt: "Poteries et objets d'artisanat togolais" },
+];
+
+// Google Maps listing of the studio (rating and review shown on the home page)
+const GOOGLE_REVIEWS_URL = "https://maps.app.goo.gl/rDQDhbmMX1nsQBkT9";
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -404,6 +430,76 @@ export default function Home() {
               <span>Voir la galerie complète & plein écran</span>
               <ArrowRight size={16} />
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== GOOGLE REVIEW ===== */}
+      <section className="review-section" id="avis">
+        <div className="container">
+          <figure className="review-card">
+            <div className="review-stars" aria-label="Note de 4,7 sur 5">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <Star key={i} size={20} fill="currentColor" strokeWidth={0} aria-hidden="true" />
+              ))}
+            </div>
+            <blockquote className="review-quote">
+              « Professionnel et bien au-delà. Il a un esprit de créativité hors pair. »
+            </blockquote>
+            <figcaption className="review-author">
+              Romaric B. · avis Google
+            </figcaption>
+            <a
+              href={GOOGLE_REVIEWS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="review-link"
+            >
+              <strong>4,7 / 5</strong> sur Google Maps · voir les avis
+            </a>
+          </figure>
+        </div>
+      </section>
+
+      {/* ===== INSTAGRAM ===== */}
+      <section className="instagram-section" id="instagram">
+        <div className="container">
+          <p className="page-header-subtitle" style={{ textAlign: "center" }}>
+            @epsigate_photography
+          </p>
+          <h2 className="section-title">Suivez-nous sur Instagram</h2>
+          <p className="section-intro-text">
+            Coulisses, séances récentes et événements : plus de 2 000 abonnés suivent déjà notre travail.
+          </p>
+
+          <div className="instagram-grid">
+            {instagramPosts.map((post) => (
+              <a
+                key={post.src}
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="instagram-item"
+              >
+                <Image src={post.src} alt={post.alt} fill sizes="(max-width: 768px) 50vw, 16vw" />
+                <span className="instagram-item-overlay" aria-hidden="true">
+                  <InstagramIcon size={26} />
+                </span>
+              </a>
+            ))}
+          </div>
+
+          <div style={{ textAlign: "center" }}>
+            <a
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-outline"
+              style={{ display: "inline-flex", gap: "8px", alignItems: "center" }}
+            >
+              <InstagramIcon size={18} />
+              <span>Voir le compte Instagram</span>
+            </a>
           </div>
         </div>
       </section>

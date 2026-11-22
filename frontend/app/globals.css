@@ -742,6 +742,104 @@ h6 {
   color: rgba(255, 255, 255, 0.85);
 }
 
+/* ===== HOME: GOOGLE REVIEW ===== */
+.review-section {
+  padding: 70px 0;
+  background: var(--bg-primary);
+}
+
+.review-card {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.review-stars {
+  display: inline-flex;
+  gap: 4px;
+  color: #e0a526;
+  margin-bottom: 18px;
+}
+
+.review-quote {
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-size: clamp(1.5rem, 3.2vw, 2.1rem);
+  line-height: 1.35;
+  color: var(--text-primary);
+  margin: 0 0 16px;
+}
+
+.review-author {
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+}
+
+.review-link {
+  display: inline-block;
+  font-size: 0.9rem;
+  color: var(--burgundy);
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 2px;
+}
+
+/* ===== HOME: INSTAGRAM ===== */
+.instagram-section {
+  padding: 80px 0 100px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-light);
+}
+
+.instagram-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin-bottom: 40px;
+}
+
+.instagram-item {
+  position: relative;
+  aspect-ratio: 1/1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--image-placeholder);
+}
+
+.instagram-item img {
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.instagram-item:hover img,
+.instagram-item:focus-visible img {
+  transform: scale(1.08);
+}
+
+.instagram-item-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  background: rgba(107, 29, 42, 0.55);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.instagram-item:hover .instagram-item-overlay,
+.instagram-item:focus-visible .instagram-item-overlay {
+  opacity: 1;
+}
+
+@media (max-width: 900px) {
+  .instagram-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 /* ===== SERVICES PAGE: FULL DETAIL ===== */
 .services-detail-list {
   display: flex;

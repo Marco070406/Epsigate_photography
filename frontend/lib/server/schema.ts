@@ -95,15 +95,15 @@ CREATE TABLE IF NOT EXISTS admin_config (
 );
 
 -- Rate limits shared by every serverless instance (admin login, contact form)
--- Keep this table last: migrate.ts checks for it to know the schema is up to date.
+-- migrate.ts stores the migration version as this table's comment.
 CREATE TABLE IF NOT EXISTS rate_limits (
   key       VARCHAR(100) PRIMARY KEY,
   count     INTEGER      NOT NULL,
   reset_at  TIMESTAMPTZ  NOT NULL
 );
 
--- Columns added after the first release: existing databases get them here.
--- migrate.ts checks for the newest one (messages.event_time).
+-- Columns added after the first release: existing databases get them here
+-- (bump CONTENT_VERSION in content.ts after adding one).
 ALTER TABLE messages ADD COLUMN IF NOT EXISTS event_time VARCHAR(5);
 `;
 

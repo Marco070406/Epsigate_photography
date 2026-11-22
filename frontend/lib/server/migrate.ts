@@ -4,6 +4,7 @@
  */
 import { pool } from "./database";
 import { SCHEMA_SQL, SEED_SQL } from "./schema";
+import { CONTENT_SQL, CONTENT_VERSION } from "./content";
 
 // Arbitrary key so concurrent serverless instances never seed twice
 const MIGRATION_LOCK_KEY = 4207;
@@ -13,16 +14,13 @@ let ready: Promise<void> | null = null;
 async function migrate(): Promise<void> {
   const client = await pool.connect();
   try {
-    // Fast path: rate_limits is the last table of SCHEMA_SQL and messages.event_time
-    // its newest column, created in the same transaction as the seed, so their
-    // presence means the database is fully set up (one query per cold start).
-    // When adding a table or column, move this check to it so existing databases
-    // get it too.
+    // Fast path (one query per cold start): the last migration stores its version
+    // as the comment of the rate_limits table, in the same transaction as the
+    // schema, seed and content updates. Bump CONTENT_VERSION after changing
+    // SCHEMA_SQL or CONTENT_SQL so existing databases get the change.
     const check = await client.query(
-      `SELECT to_regclass('public.rate_limits') IS NOT NULL AND EXISTS (
-         SELECT 1 FROM information_schema.columns
-         WHERE table_schema = 'public' AND table_name = 'messages' AND column_name = 'event_time'
-       ) AS ready`
+      "SELECT obj_description(to_regclass('public.rate_limits'), 'pg_class') = $1 AS ready",
+      [CONTENT_VERSION]
     );
     if (check.rows[0].ready) return;
 
@@ -35,6 +33,9 @@ async function migrate(): Promise<void> {
       await client.query(SEED_SQL);
       console.log("✅ Base initialisée avec les données de départ");
     }
+    await client.query(CONTENT_SQL);
+    // COMMENT does not accept parameters; the version is a constant from content.ts
+    await client.query(`COMMENT ON TABLE rate_limits IS '${CONTENT_VERSION}'`);
     await client.query("COMMIT");
   } catch (err) {
     await client.query("ROLLBACK").catch(() => {});

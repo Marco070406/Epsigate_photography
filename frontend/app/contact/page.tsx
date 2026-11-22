@@ -26,9 +26,9 @@ function ContactPageInner() {
   const [errorMessage, setErrorMessage] = useState("");
   const [settings, setSettings] = useState({
     studioName: "Epsigate Photography",
-    address: "Boulevard du 13 Janvier, Quartier Administratif, Lomé, Togo",
+    address: "Djidjolé, à côté de l'école des sourds, Lomé, Togo",
     zone: "Lomé, tout le Togo, Afrique de l'Ouest & International",
-    phone: "+228 90 00 00 00 / +228 22 21 00 00",
+    phone: "+228 90 78 29 22",
     whatsapp: "+228 90 00 00 00",
     email: "contact@epsigate-photography.com",
     weekdayHours: "Lundi - Vendredi : 08:30 - 18:30",
@@ -473,7 +473,7 @@ function ContactPageInner() {
                 href={
                   settings.googleMapsLink ||
                   `https://maps.google.com/?q=${encodeURIComponent(
-                    settings.address || "Boulevard du 13 Janvier, Lomé, Togo"
+                    settings.address || "Djidjolé, Lomé, Togo"
                   )}`
                 }
                 target="_blank"
