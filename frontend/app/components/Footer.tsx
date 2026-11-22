@@ -74,7 +74,7 @@ export default function Footer() {
               <p className="footer-section-title">Suivez-nous</p>
               <div className="footer-socials">
                 <a
-                  href="https://instagram.com"
+                  href="https://www.instagram.com/epsigate_photography"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="social-link"
